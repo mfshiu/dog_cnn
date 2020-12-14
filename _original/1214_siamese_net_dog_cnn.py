@@ -430,10 +430,10 @@ class TestDataset(Dataset):
           test_id_str = "00"+str(test_id)
         else:
           test_id_str = "000"+str(test_id)
-        #農委會狗鼻_手標/0030/1.PNG  
-        files = glob.glob(os.path.join("./農委會狗鼻_手標/"+id_str,"*.PNG"))
+        #狗鼻紋影像資料庫_segmented/0030/1.PNG
+        files = glob.glob(os.path.join("./狗鼻紋影像資料庫_segmented/"+id_str,"*.PNG"))
         #print("id",id, test_id_str)
-        test_img = glob.glob(os.path.join("./農委會狗鼻_手標/"+test_id_str,"*.PNG"))
+        test_img = glob.glob(os.path.join("./狗鼻紋影像資料庫_segmented/"+test_id_str,"*.PNG"))
 
         print(files, test_img)
         while test_id == id:
@@ -442,10 +442,10 @@ class TestDataset(Dataset):
             test_id_str = "00"+str(test_id)
           else:
             test_id_str = "000"+str(test_id)
-          #農委會狗鼻_手標/0030/1.PNG  
-          files = glob.glob(os.path.join("./農委會狗鼻_手標/"+id_str,"*.PNG"))
+          #狗鼻紋影像資料庫_segmented/0030/1.PNG
+          files = glob.glob(os.path.join("./狗鼻紋影像資料庫_segmented/"+id_str,"*.PNG"))
           #print("id",id, test_id_str)
-          test_img = glob.glob(os.path.join("./農委會狗鼻_手標/"+test_id_str,"*.PNG"))
+          test_img = glob.glob(os.path.join("./狗鼻紋影像資料庫_segmented/"+test_id_str,"*.PNG"))
         self.test_id = test_id
         
 
