@@ -28,7 +28,7 @@ from torch.utils.data import DataLoader, Dataset
 
 path = "./狗鼻紋影像資料庫_segmented"
 
-"""This function is used for sorting the images of the MNIST datset"""
+"""This function is used for sorting the img of the MNIST datset"""
 
 def secondval( value ):
     
@@ -129,7 +129,7 @@ class SiamDataset(Dataset):
     def __getitem__(self, idx):
         
         # this class is needed to be defined so that dataloader can be used
-        # here instead of giving the real index values I have returned randomly generated images
+        # here instead of giving the real index values I have returned randomly generated img
         # so idx does not have any need but the function signature needs to be same so that the dataloader
         # can call this function
         
