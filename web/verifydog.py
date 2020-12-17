@@ -1,4 +1,5 @@
 from model import Siamese
+from model import is_use_gpu
 import numpy as np
 import sys
 import os
@@ -56,7 +57,7 @@ def verify_dogs():
     test_set = TestDataset(image_path_1, image_path_2)
     test_dataloader = DataLoader(test_set, shuffle=True, batch_size= 1, num_workers=0)
 
-    if torch.cuda.is_available():
+    if is_use_gpu():
         siam_test = Siamese().cuda()
         siam_test.load_state_dict(torch.load(model_path))
         siam_test.eval()

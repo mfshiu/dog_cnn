@@ -6,6 +6,13 @@ import torch as to
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 
+use_gpu = False
+
+
+def is_use_gpu():
+    return use_gpu and to.cuda.is_available()
+
+
 class Siamese(nn.Module):
     
     def __init__(self):
@@ -73,7 +80,7 @@ class Siamese(nn.Module):
         
         # this can be used later for evalutation
 
-        if to.cuda.is_available():
+        if is_use_gpu():
             m = to.tensor(1.0, dtype=to.float32).cuda()
             if type(m) != type(x):
                 x = to.tensor(x, dtype = to.float32, requires_grad = False).cuda()
