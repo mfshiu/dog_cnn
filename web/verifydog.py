@@ -47,13 +47,13 @@ class TestDataset(Dataset):
 
 
 img_size = 128
-image_path_1 = "./static/dogs/0001/0.PNG"
-image_path_2 = "./static/dogs/0001/1.PNG"
 threshold = 0.5
 model_path = "./model.pkl"
 
 
-def verify_dogs():
+def verify_dogs(left_dog, right_dog):
+    image_path_1 = "./static/dogs/%s/0.PNG" % format(left_dog)
+    image_path_2 = "./static/" + right_dog  #dogs/0001/1.PNG"
     test_set = TestDataset(image_path_1, image_path_2)
     test_dataloader = DataLoader(test_set, shuffle=True, batch_size= 1, num_workers=0)
 

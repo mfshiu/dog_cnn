@@ -864,9 +864,9 @@
             <div class="small-box bg-info">
               <div class="inner">
                 <h3>Enrolled</h3>
-                <img src="{{ url_for('static', filename='dogs/0001/0.PNG') }}">
+                <img src="{{ url_for('static', filename=dog_left) }}">
               </div>
-              <a href="#" class="small-box-footer">Select a dog <i class="fas fa-arrow-circle-right"></i></a>
+              <a href="#" class="small-box-footer" data-toggle="modal" data-target="#modal-select-dog">Select a dog <i class="fas fa-arrow-circle-right"></i></a>
             </div>
           </div>
           <!-- ./col -->
@@ -875,9 +875,9 @@
             <div class="small-box bg-warning">
               <div class="inner">
                 <h3>Ready to be Verified</h3>
-                <img src="{{ url_for('static', filename='dogs/0001/1.PNG') }}">
+                <img src="{{ url_for('static', filename=dog_right) }}">
               </div>
-              <a href="#" class="small-box-footer">Upload a dog <i class="fas fa-arrow-circle-right"></i></a>
+              <a href="#" class="small-box-footer" data-toggle="modal" data-target="#modal-upload-dog">Upload a dog <i class="fas fa-arrow-circle-right"></i></a>
             </div>
           </div>
           <!-- ./col -->
@@ -945,6 +945,82 @@
 </div>
 <!-- ./wrapper -->
 
+<div class="modal fade" id="modal-select-dog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Select a Dog</h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div>
+                <div class="filter-container p-0 row">
+                  <div class="filtr-item col-sm-2" data-category="1" data-sort="white sample">
+                    <a href="#" onclick="selectDog('0001')">
+                      <img src="{{ url_for('static', filename='dogs/0001/0.PNG') }}" class="img-fluid mb-2" alt="white sample"/>
+                    </a>
+                  </div>
+                  <div class="filtr-item col-sm-2" data-category="2, 4" data-sort="black sample">
+                    <a href="#" onclick="selectDog('0002')">
+                      <img src="{{ url_for('static', filename='dogs/0002/0.PNG') }}" class="img-fluid mb-2" alt="black sample"/>
+                    </a>
+                  </div>
+                  <div class="filtr-item col-sm-2" data-category="3, 4" data-sort="red sample">
+                    <a href="#" onclick="selectDog('0003')">
+                      <img src="{{ url_for('static', filename='dogs/0003/0.PNG') }}" class="img-fluid mb-2" alt="red sample"/>
+                    </a>
+                  </div>
+                  <div class="filtr-item col-sm-2" data-category="3, 4" data-sort="red sample">
+                    <a href="#" onclick="selectDog('0004')">
+                      <img src="{{ url_for('static', filename='dogs/0004/0.PNG') }}" class="img-fluid mb-2" alt="red sample"/>
+                    </a>
+                  </div>
+                  <div class="filtr-item col-sm-2" data-category="2, 4" data-sort="black sample">
+                    <a href="#" onclick="selectDog('0005')">
+                      <img src="{{ url_for('static', filename='dogs/0005/0.PNG') }}" class="img-fluid mb-2" alt="black sample"/>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
+
+<div class="modal fade" id="modal-upload-dog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Upload a Dog</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <form method=post action="demo1" enctype=multipart/form-data>
+                <div class="modal-body">
+                  <div>
+                    <input type="file" name="right_dog">
+                  </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-primary">Upload</button>
+                </div>
+              </form>
+            </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
+<!-- /.modal -->
+
 <!-- jQuery -->
 <script src="{{ url_for('static', filename='plugins/jquery/jquery.min.js') }}"></script>
 <!-- jQuery UI 1.11.4 -->
@@ -988,6 +1064,8 @@
 
   function verifyDog() {
     $.get( "/verify_dog", function( data ) {
+      $('#result-yes').hide();
+      $('#result-no').hide();
       if (data.is_equal) {
         $('#result-yes').show();
       }
@@ -997,6 +1075,9 @@
     });
   }
 
+  function selectDog(dog) {
+    location.href = "demo1?dog=" + dog;
+  }
 </script>
 </body>
 </html>
