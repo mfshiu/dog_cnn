@@ -4,6 +4,7 @@ import numpy as np
 import sys
 import os
 from torch.utils.data import DataLoader, Dataset
+import math
 
 import torch
 import torch.nn as nn
@@ -47,8 +48,12 @@ class TestDataset(Dataset):
 
 
 img_size = 128
-threshold = 0.5
+threshold = 0.76
 model_path = "./model.pkl"
+
+
+def sigmoid(x):
+    return 1/(1+math.exp(-x))
 
 
 def verify_dogs(left_dog, right_dog):
@@ -70,6 +75,9 @@ def verify_dogs(left_dog, right_dog):
         siam_test.eval()
         for data in test_dataloader:
             im1, im2 = data
-            diss = siam_test.evaluate(im1.cpu(),im2.cpu())
+            diss = siam_test.evaluate(im1.cpu(), im2.cpu())
 
-    return bool(diss < float(threshold))
+    # 0 ~ 1
+    similarity = 2 * (1 - math.fabs(sigmoid(diss)))
+
+    return bool(similarity > float(threshold)), similarity

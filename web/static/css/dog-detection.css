@@ -1,4 +1,8 @@
 
+#result-no, #result-yes, #result-data {
+    display: none;
+}
+
 .modal-dialog {
     max-width: 80%;
 }

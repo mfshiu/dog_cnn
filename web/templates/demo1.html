@@ -916,7 +916,14 @@
                       <h5><i class="icon fas fa-check"></i> YES</h5>
                       Yes, they are the same dog.
                     </div>
-                   </div>
+                    <table id="result-data" class="table table-bordered">
+                      <tbody>
+                        <tr>
+                          <th>Similarity</th><td><span id="result-similarity"></span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div><!-- /.card-body -->
             </div>
@@ -1057,10 +1064,10 @@
 <script src="{{ url_for('static', filename='dist/js/pages/dashboard.js') }}"></script>
 
 <script>
-  $(function() {
-    $('#result-yes').hide();
-    $('#result-no').hide();
-  });
+<!--  $(function() {-->
+<!--    $('#result-yes').hide();-->
+<!--    $('#result-no').hide();-->
+<!--  });-->
 
   function verifyDog() {
     $.get( "/verify_dog", function( data ) {
@@ -1072,6 +1079,8 @@
       else {
         $('#result-no').show();
       }
+      $('#result-data').show();
+      $('#result-similarity').text(data.similarity);
     });
   }
 

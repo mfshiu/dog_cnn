@@ -55,8 +55,8 @@ def demo3():
 
 @app.route("/verify_dog")
 def verify_dog():
-    is_equal = verify_dogs(left_dog, "upload/" + right_dog)
-    return {'is_equal': is_equal}
+    is_equal, similarity = verify_dogs(left_dog, "upload/" + right_dog)
+    return {'is_equal': is_equal, 'similarity': similarity}
 
 
 @app.route("/home")
