@@ -23,10 +23,18 @@ import matplotlib.pyplot as plt
 import torch as to
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
+import os
 
 """## Training the Siamese Netwrok"""
 
 path = "./狗鼻紋影像資料庫_segmented"
+
+output_path = "./output"
+if not os.path.exists(output_path):
+    os.makedirs(output_path)
+trained_dir = './trained'
+if not os.path.exists(trained_dir):
+    os.makedirs(trained_dir)
 
 """This function is used for sorting the images of the MNIST datset"""
 
@@ -46,7 +54,6 @@ import torch.utils.data as Data
 import torchvision
 import matplotlib.pyplot as plt
 import glob
-import os
 from PIL import Image
 import warnings
 warnings.simplefilter("ignore", UserWarning)
@@ -309,7 +316,7 @@ if __name__ == '__main__':
     test_dataloader = DataLoader(testset, shuffle=True, batch_size= 1,
                             num_workers=15)
 
-    number_epochs = 5
+    max_epochs = 5
     Criterion = ContrastiveLoss()
     Optimizer = to.optim.Adam(siam.parameters(),lr = 0.01 )
 
@@ -320,7 +327,7 @@ if __name__ == '__main__':
 
     start = 0
     siam.train()
-    for epoch in range(start,start+number_epochs):
+    for epoch in range(start, start + max_epochs):
         for data in train_dataloader:
             #print(data)
             siam.train()
@@ -355,17 +362,14 @@ if __name__ == '__main__':
 
         # printing the training errors
 
-        print("Epoch number {}\n  Current loss {} Val loss {}\n".format(epoch,loss_contrastive.item(),val_loss_contrastive.item()))
+        print("Epoch number {}/{}\n  Current loss {} Val loss {}\n".format(epoch, max_epochs, loss_contrastive.item(), val_loss_contrastive.item()))
         counter.append(epoch+100)
         loss_history.append(loss_contrastive.item())
 
     """##### Saving the model and plotting the error"""
 
     import os
-    save_dir = './trained'
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-    model_path = os.path.join(save_dir, "Siamese.pkl")
+    model_path = os.path.join(trained_dir, "Siamese.pkl")
     to.save(siam.state_dict(), model_path)
     siam_test = Siamese().cuda()
     siam_test.load_state_dict(torch.load(model_path))
@@ -384,6 +388,7 @@ if __name__ == '__main__':
         trial.append(siamdset[i])
 
     threshold = 1.1
+    plt.savefig("./output/trained.png")
     fig = plt.figure(1, figsize=(30,100))
 
     i = 1
@@ -420,9 +425,6 @@ if __name__ == '__main__':
         i+=8
 
 
-    output_path = "./output"
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
     plt.savefig(os.path.join(output_path, "siam_test.png"))
     plt.show()
 
