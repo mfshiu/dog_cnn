@@ -192,8 +192,8 @@ if __name__ == '__main__':
     model_path = os.path.join(trained_dir, "Siamese.pkl")
     to.save(siam.state_dict(), model_path)
     if use_gpu:
-        siam_test = Siamese(use_gpu).cuda()
+        siam_test = Siamese().cuda()
     else:
-        siam_test = Siamese(use_gpu).cpu()
+        siam_test = Siamese().cpu()
     siam_test.load_state_dict(to.load(model_path))
     siam_test.eval()
