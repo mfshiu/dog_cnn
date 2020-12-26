@@ -361,18 +361,13 @@ if __name__ == '__main__':
 
     """##### Saving the model and plotting the error"""
 
-    plt.plot(counter,loss_history)
-
-    from google.colab import drive
     import os
-    drive.mount('/content/gdrive')
-    save_path = 'gdrive/My Drive/Dogs/CNN'
+    save_path = './trained'
     if not os.path.exists(save_path):
         os.makedirs(save_path)
-
-    to.save(siam.state_dict(), save_path+"/Siamese model.pth")
+    to.save(siam.state_dict(), os.path.join(save_path, "/Siamese.pkl"))
     siam_test = Siamese().cuda()
-    siam_test.load_state_dict(torch.load(save_path+"/Siamese model.pth"))
+    siam_test.load_state_dict(torch.load(save_path+"/Siamese.pkl"))
     siam_test.eval()
 
     """## Testing the model's prediction"""
@@ -424,7 +419,10 @@ if __name__ == '__main__':
         i+=8
 
 
-    plt.show()
+    output_path = "./output"
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    plt.savefig(os.path.join(output_path, "siam_test.png"))
 
 # !ls
 img_size = 256
@@ -564,5 +562,5 @@ if __name__ == '__main__':
           i+=8
 
 
-      plt.show()
-
+      # plt.show()
+      plt.savefig(os.path.join(output_path, "testset.png"))
