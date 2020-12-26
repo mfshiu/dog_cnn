@@ -99,7 +99,7 @@ class ContrastiveLoss(nn.Module):
 
 
 img_size = 128
-max_epochs = 5
+max_epochs = 50
 
 
 class SiamDataset():
@@ -194,7 +194,7 @@ if __name__ == '__main__':
     dataset_dir = "./dataset/train"
 
     siam_dataset = SiamDataset(dataset_dir)
-    train_dataloader = DataLoader(siam_dataset.get_train_dataset(), shuffle=True, batch_size=1, num_workers=15)
+    train_dataloader = DataLoader(siam_dataset.get_train_dataset(), shuffle=True, batch_size=20, num_workers=15)
     test_dataloader = DataLoader(siam_dataset.get_test_dataset(), shuffle=True, batch_size=1, num_workers=15)
 
     if use_gpu:
@@ -251,7 +251,7 @@ if __name__ == '__main__':
             
             val_loss_contrastive = loss_pos + loss_neg
 
-        print("\rEpoch {}/{}\tCurrent loss {} Val loss {}\n".format(
+        print("\rEpoch {}/{} Current loss {} Val loss {}\n".format(
             epoch, max_epochs, loss_contrastive.item(), val_loss_contrastive.item()))
 
         loss_history.append(loss_contrastive.item())
@@ -261,8 +261,8 @@ if __name__ == '__main__':
     model_path = os.path.join(trained_dir, "Siamese.pkl")
     to.save(siam.state_dict(), model_path)
     if use_gpu:
-        siam_test = Siamese().cuda()
+        siam_test = Siamese(use_gpu).cuda()
     else:
-        siam_test = Siamese().cpu()
+        siam_test = Siamese(use_gpu).cpu()
     siam_test.load_state_dict(to.load(model_path))
     siam_test.eval()
