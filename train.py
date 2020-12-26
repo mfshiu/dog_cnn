@@ -210,7 +210,7 @@ if __name__ == '__main__':
         test_dataloader = DataLoader(siam_dataset.get_test_dataset(), shuffle=True, batch_size=1, num_workers=15)
         for data in train_dataloader:
             loops += 1
-            print("\rEpoch %d/%d, training loops: %d" % (epoch, max_epochs, loops), end="")
+            print("\rEpoch %d/%d, training loops: %d" % (epoch+1, max_epochs, loops), end="")
             siam.train()
             img1, img2, label1, img3, img4, label2 = data
 
