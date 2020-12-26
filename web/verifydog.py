@@ -80,4 +80,4 @@ def verify_dogs(left_dog, right_dog):
     # 0 ~ 1
     similarity = 2 * (1 - math.fabs(sigmoid(diss)))
 
-    return bool(similarity > float(threshold)), similarity
+    return bool(similarity > threshold), similarity
