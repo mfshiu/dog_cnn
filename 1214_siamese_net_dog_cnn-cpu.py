@@ -36,7 +36,7 @@ def secondval( value ):
 
 """##### The Data Set for Siamese Networks
 
-Here we define the dataset class that will be used by dataloader for training the siamese network
+Here we define the dataset class that will be used by dataloader for train the siamese network
 """
 
 import torch
@@ -60,7 +60,7 @@ if_use_gpu = 0            #使用gpu
 img_size = 128
 class SiamDataset(Dataset):
     
-    def __init__(self, mode = "training"):
+    def __init__(self, mode = "train"):
         
         # We import the MNIST dataset that is pre formatted and kept as a csv file 
         # in which each row contains a single image flattened out to 784 pixels
@@ -87,7 +87,7 @@ class SiamDataset(Dataset):
             temp.append(filename)
             labels.append(id)
             #print(id, filename)
-          if mode == "training":
+          if mode == "train":
             temp = temp[:18]
             labels = labels[:18]
             test_temp = temp[18:]
@@ -106,7 +106,7 @@ class SiamDataset(Dataset):
         self.labels = labels
         self.img = img
         self.test_img = test_img
-        # training 時做 data augmentation
+        # train 時做 data augmentation
         self.transform = transforms.Compose([
             
             transforms.ToPILImage(),
@@ -190,14 +190,14 @@ class SiamDataset(Dataset):
             
     def __len__(self):
         
-        # here I gave a smaller length than the real dataset's length so that the training can be faster
+        # here I gave a smaller length than the real dataset's length so that the train can be faster
         if self.mode =="testing":
           return 10    
         return 500
 
 """##### The Model Definition of Siamese Network
 
-Here unlike as stated in the paper I have used a single network and trained the dataset. This can be done as both the layers are completely tied even in the training.
+Here unlike as stated in the paper I have used a single network and trained the dataset. This can be done as both the layers are completely tied even in the train.
 """
 
 class Siamese(nn.Module):
@@ -354,7 +354,7 @@ if __name__ == '__main__':
             loss_neg = Criterion(output3,output4,label2.cpu())
             val_loss_contrastive = loss_pos + loss_neg
 
-        # printing the training errors
+        # printing the train errors
 
         print("Epoch number {}\n  Current loss {} Val loss {}\n".format(epoch,loss_contrastive.item(),val_loss_contrastive.item()))
         counter.append(epoch+100)
@@ -520,7 +520,7 @@ if __name__ == '__main__':
 #
 #     def __len__(self):
 #
-#         # here I gave a smaller length than the real dataset's length so that the training can be faster
+#         # here I gave a smaller length than the real dataset's length so that the train can be faster
 #
 #         return 1
 #

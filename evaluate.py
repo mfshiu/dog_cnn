@@ -108,7 +108,7 @@ def calculate_far_frr(inferences, group_size, threshold):
 if __name__ == '__main__':
     inference_output_path = "output/inferences-chinatrust.tsv"
     eer_output_path = "output/far_frr-chinatrust.tsv"
-    dog_input_root = "中國信託_狗鼻切割"
+    dog_input_root = "verification"
     dog_count = 85
     group_size = 2
 
