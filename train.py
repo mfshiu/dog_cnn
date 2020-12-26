@@ -116,13 +116,13 @@ class SiamDataset():
             dog1_1, dog1_2 = random.sample(dog1, 2)
             dog1_1_img = self.transform(np.array(Image.open(dog1_1).convert("RGB")))
             dog1_2_img = self.transform(np.array(Image.open(dog1_2).convert("RGB")))
-            dog1_1_tensor = to.as_tensor(np.reshape(dog1_1_img, (3, img_size, img_size)), dtype=to.float32).clone().detach()
-            dog1_2_tensor = to.as_tensor(np.reshape(dog1_2_img, (3, img_size, img_size)), dtype=to.float32).clone().detach()
+            dog1_1_tensor = to.as_tensor(np.reshape(dog1_1_img, (3, img_size, img_size)), dtype=to.float32)
+            dog1_2_tensor = to.as_tensor(np.reshape(dog1_2_img, (3, img_size, img_size)), dtype=to.float32)
             y1 = to.tensor(np.ones(1, dtype=np.float32), dtype=to.float32)
 
             dog2_1 = random.choice(dog2)
             dog2_1_img = self.transform(np.array(Image.open(dog2_1).convert("RGB")))
-            dog2_1_tensor = to.as_tensor(np.reshape(dog2_1_img, (3, img_size, img_size)), dtype=to.float32).clone().detach()
+            dog2_1_tensor = to.as_tensor(np.reshape(dog2_1_img, (3, img_size, img_size)), dtype=to.float32)
             y2 = to.tensor(np.zeros(1, dtype=np.float32), dtype=to.float32)
 
             return dog1_1_tensor, dog1_2_tensor, y1, dog1_1_tensor, dog2_1_tensor, y2
@@ -259,7 +259,7 @@ if __name__ == '__main__':
         loss_history.append(loss_contrastive.item())
 
     plt.plot([x for x in range(max_epochs)], loss_history)
-    plt.savefig(os.path.join(output_path, "loss-50.png"))
+    plt.savefig(os.path.join(output_path, "loss.png"))
 
     model_path = os.path.join(trained_dir, "Siamese.pkl")
     to.save(siam.state_dict(), model_path)
