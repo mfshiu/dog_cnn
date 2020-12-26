@@ -23,7 +23,8 @@ import warnings
 
 img_size = 128
 # threshold = 0.76
-model_path = "./model.pkl"
+model_path = "./trained/Siamese-500.pkl"
+use_gpu = True
 
 
 class TestDataset(Dataset):
@@ -108,7 +109,7 @@ def calculate_far_frr(inferences, group_size, threshold):
 if __name__ == '__main__':
     inference_output_path = "output/inferences-chinatrust.tsv"
     eer_output_path = "output/far_frr-chinatrust.tsv"
-    dog_input_root = "verification"
+    dog_input_root = "dataset/verification"
     dog_count = 85
     group_size = 2
 

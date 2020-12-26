@@ -259,7 +259,7 @@ if __name__ == '__main__':
         loss_history.append(loss_contrastive.item())
 
     plt.plot([x for x in range(max_epochs)], loss_history)
-    plt.savefig(os.path.join(output_path, "loss.png"))
+    plt.savefig(os.path.join(output_path, "loss-50.png"))
 
     model_path = os.path.join(trained_dir, "Siamese.pkl")
     to.save(siam.state_dict(), model_path)
