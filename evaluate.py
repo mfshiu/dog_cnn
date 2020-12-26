@@ -23,7 +23,7 @@ import warnings
 
 img_size = 128
 # threshold = 0.76
-model_path = "./trained/Siamese-500.pkl"
+model_path = "./trained/Siamese.pkl"
 use_gpu = True
 
 
