@@ -193,10 +193,6 @@ if __name__ == '__main__':
         
     dataset_dir = "./dataset/train"
 
-    siam_dataset = SiamDataset(dataset_dir)
-    train_dataloader = DataLoader(siam_dataset.get_train_dataset(), shuffle=True, batch_size=20, num_workers=15)
-    test_dataloader = DataLoader(siam_dataset.get_test_dataset(), shuffle=True, batch_size=1, num_workers=15)
-
     if use_gpu:
         siam = Siamese(use_gpu).cuda()
     else:
@@ -208,6 +204,9 @@ if __name__ == '__main__':
     siam.train()
     for epoch in range(max_epochs):
         loops = 0
+        siam_dataset = SiamDataset(dataset_dir)
+        train_dataloader = DataLoader(siam_dataset.get_train_dataset(), shuffle=True, batch_size=20, num_workers=15)
+        test_dataloader = DataLoader(siam_dataset.get_test_dataset(), shuffle=True, batch_size=1, num_workers=15)
         for data in train_dataloader:
             loops += 1
             print("\rEpoch %d/%d, training loops: %d" % (epoch, max_epochs, loops), end="")
