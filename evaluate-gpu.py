@@ -59,7 +59,7 @@ def sigmoid(x):
 
 
 siam_test = Siamese().cuda()
-siam_test.load_state_dict(torch.load(model_path, map_location=torch.device('cuda')))
+siam_test.load_state_dict(torch.load(model_path, map_location=torch.device('cuda:1')))
 siam_test.eval()
 def evaludate_gpu(data):
     im1, im2 = data
