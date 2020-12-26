@@ -176,7 +176,6 @@ class SiamDataset():
         test_size = int(len(self.img_pathss) * self.test_ratio)
         self.train_paths = self.img_pathss[test_size:]
         self.test_paths = self.img_pathss[:test_size]
-        print("Train dogs: %d, Test dogs: %d" % (len(self.train_paths), len(self.test_paths)))
 
 
 output_path = "./output"
@@ -201,6 +200,7 @@ if __name__ == '__main__':
     Optimizer = to.optim.Adam(siam.parameters(),lr = 0.01 )
 
     siam_dataset = SiamDataset(dataset_dir)
+    print("Train dogs: %d, Test dogs: %d" % (len(siam_dataset.train_paths), len(siam_dataset.test_paths)))
     loss_history = []
     siam.train()
     for epoch in range(max_epochs):
