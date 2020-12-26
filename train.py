@@ -194,8 +194,8 @@ if __name__ == '__main__':
     dataset_dir = "./dataset/train"
 
     siam_dataset = SiamDataset(dataset_dir)
-    train_dataloader = DataLoader(siam_dataset.get_train_dataset(), shuffle=True, batch_size=20, num_workers=15)
-    test_dataloader = DataLoader(siam_dataset.get_test_dataset(), shuffle=True, batch_size=20, num_workers=15)
+    train_dataloader = DataLoader(siam_dataset.get_train_dataset(), shuffle=True, batch_size=1, num_workers=15)
+    test_dataloader = DataLoader(siam_dataset.get_test_dataset(), shuffle=True, batch_size=1, num_workers=15)
 
     if use_gpu:
         siam = Siamese(use_gpu).cuda()
@@ -234,7 +234,6 @@ if __name__ == '__main__':
 
         siam.eval()
 
-        print()
         for data in test_dataloader:
             print("\rEpoch %d/%d, testing loops: %d" % (epoch, max_epochs, loops), end="")
             img1, img2, label1, img3, img4, label2 = data
@@ -252,7 +251,7 @@ if __name__ == '__main__':
             
             val_loss_contrastive = loss_pos + loss_neg
 
-        print("\nEpoch number {}/{}\n\tCurrent loss {} Val loss {}\n".format(
+        print("\rEpoch {}/{}\tCurrent loss {} Val loss {}\n".format(
             epoch, max_epochs, loss_contrastive.item(), val_loss_contrastive.item()))
 
         loss_history.append(loss_contrastive.item())
