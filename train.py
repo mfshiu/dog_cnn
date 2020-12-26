@@ -94,13 +94,13 @@ class SiamDataset():
         self.shuffle()
 
     def get_train_dataset(self):
-        return SiamDataset.TrainDataset(self.train_paths)
+        return SiamDataset.TrainDataset(self.train_paths, 500)
 
     def get_test_dataset(self):
-        return SiamDataset.TestDataset(self.test_paths)
+        return SiamDataset.TestDataset(self.test_paths, 10)
 
     def shuffle(self):
-        random.shuffle(self.img_pathss)
+        # random.shuffle(self.img_pathss)
         test_size = int(len(self.img_pathss) * self.test_ratio)
         self.train_paths = self.img_pathss[test_size:]
         self.test_paths = self.img_pathss[:test_size]
@@ -127,7 +127,7 @@ if __name__ == '__main__':
     else:
         siam = Siamese().cpu()
     Criterion = ContrastiveLoss()
-    Optimizer = to.optim.Adam(siam.parameters(),lr = 0.01 )
+    Optimizer = to.optim.Adam(siam.parameters(), lr=0.01)
 
     siam_dataset = SiamDataset(dataset_dir)
     print("Train dogs: %d, Test dogs: %d" % (len(siam_dataset.train_paths), len(siam_dataset.test_paths)))
