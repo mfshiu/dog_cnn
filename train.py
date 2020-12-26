@@ -188,7 +188,9 @@ if not os.path.exists(trained_dir):
 
 if __name__ == '__main__':
     use_gpu = len(sys.argv) > 1 and "gpu" == sys.argv[1] and to.cuda.is_available()
-    print("Use GPU: %s" % (use_gpu,))
+    if len(sys.argv) > 2:
+        max_epochs = int(sys.argv[2])
+    print("Use GPU: %s, Epochs: %d" % (use_gpu, max_epochs))
         
     dataset_dir = "./dataset/train"
 
