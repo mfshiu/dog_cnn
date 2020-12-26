@@ -207,7 +207,7 @@ if __name__ == '__main__':
     siam.train()
     for epoch in range(max_epochs):
         loops = 0
-        siam_dataset.shuffle()
+        # siam_dataset.shuffle()
         train_dataloader = DataLoader(siam_dataset.get_train_dataset(), shuffle=True, batch_size=20, num_workers=15)
         test_dataloader = DataLoader(siam_dataset.get_test_dataset(), shuffle=True, batch_size=1, num_workers=15)
         for data in train_dataloader:
@@ -237,7 +237,7 @@ if __name__ == '__main__':
         siam.eval()
 
         for data in test_dataloader:
-            print("\rEpoch %d/%d, testing loops: %d" % (epoch, max_epochs, loops), end="")
+            print("\rEpoch %d/%d, testing loops: %d " % (epoch, max_epochs, loops), end="")
             img1, img2, label1, img3, img4, label2 = data
 
             if use_gpu:
@@ -258,7 +258,8 @@ if __name__ == '__main__':
 
         loss_history.append(loss_contrastive.item())
 
-    plt.plot([x + 100 for x in range(max_epochs)], loss_history)
+    plt.plot([x for x in range(max_epochs)], loss_history)
+    plt.savefig(os.path.join(output_path, "loss.png"))
 
     model_path = os.path.join(trained_dir, "Siamese.pkl")
     to.save(siam.state_dict(), model_path)
