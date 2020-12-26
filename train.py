@@ -200,11 +200,12 @@ if __name__ == '__main__':
     Criterion = ContrastiveLoss()
     Optimizer = to.optim.Adam(siam.parameters(),lr = 0.01 )
 
+    siam_dataset = SiamDataset(dataset_dir)
     loss_history = []
     siam.train()
     for epoch in range(max_epochs):
         loops = 0
-        siam_dataset = SiamDataset(dataset_dir)
+        siam_dataset.shuffle()
         train_dataloader = DataLoader(siam_dataset.get_train_dataset(), shuffle=True, batch_size=20, num_workers=15)
         test_dataloader = DataLoader(siam_dataset.get_test_dataset(), shuffle=True, batch_size=1, num_workers=15)
         for data in train_dataloader:
