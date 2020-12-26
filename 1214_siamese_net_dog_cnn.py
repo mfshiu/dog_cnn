@@ -309,7 +309,7 @@ if __name__ == '__main__':
     test_dataloader = DataLoader(testset, shuffle=True, batch_size= 1,
                             num_workers=15)
 
-    number_epochs = 500
+    number_epochs = 5
     Criterion = ContrastiveLoss()
     Optimizer = to.optim.Adam(siam.parameters(),lr = 0.01 )
 
@@ -362,12 +362,13 @@ if __name__ == '__main__':
     """##### Saving the model and plotting the error"""
 
     import os
-    save_path = './trained'
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-    to.save(siam.state_dict(), os.path.join(save_path, "/Siamese.pkl"))
+    save_dir = './trained'
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    model_path = os.path.join(save_dir, "Siamese.pkl")
+    to.save(siam.state_dict(), model_path)
     siam_test = Siamese().cuda()
-    siam_test.load_state_dict(torch.load(save_path+"/Siamese.pkl"))
+    siam_test.load_state_dict(torch.load(model_path))
     siam_test.eval()
 
     """## Testing the model's prediction"""
@@ -423,6 +424,7 @@ if __name__ == '__main__':
     if not os.path.exists(output_path):
         os.makedirs(output_path)
     plt.savefig(os.path.join(output_path, "siam_test.png"))
+    plt.show()
 
 # !ls
 img_size = 256
@@ -562,5 +564,5 @@ if __name__ == '__main__':
           i+=8
 
 
-      # plt.show()
       plt.savefig(os.path.join(output_path, "testset.png"))
+      plt.show()
