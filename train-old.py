@@ -78,7 +78,7 @@ class SiamDataset(Dataset):
         teest_labels = []
         self.mode = mode
 
-        for id in range(1, 117):
+        for id in range(1, 119):
             if id == 98 or id == 99:
                 continue
             temp = []
@@ -93,7 +93,7 @@ class SiamDataset(Dataset):
                 temp = temp[:100]
                 labels = labels[:100]
                 test_temp = temp[100:]
-                test_labels = labels[18:]
+                test_labels = labels[100:]
 
             else:
                 temp = temp[100:]
@@ -139,7 +139,7 @@ class SiamDataset(Dataset):
 
         # I create a positive pair with label of similarity 1
 
-        clas = np.random.randint(0, 116)
+        clas = np.random.randint(0, 115)
 
         length = len(self.img[clas])
         im1, im2 = np.random.randint(0, length, 2)
@@ -162,9 +162,9 @@ class SiamDataset(Dataset):
         # I create a negative pair with label of similarity 0
 
         len1 = len(self.img[clas])
-        clas2 = np.random.randint(0, 116)
+        clas2 = np.random.randint(0, 115)
         while clas2 == clas:
-            clas2 = np.random.randint(0, 116)
+            clas2 = np.random.randint(0, 115)
 
         len2 = len(self.img[clas2])
 
