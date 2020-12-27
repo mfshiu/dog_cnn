@@ -107,6 +107,10 @@ def calculate_far_frr(inferences, group_size, threshold):
 
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        model_path = sys.argv[1]
+    print("Model path: %s" % (model_path,))
+
     inference_output_path = "output/inferences-chinatrust.tsv"
     eer_output_path = "output/far_frr-chinatrust.tsv"
     dog_input_root = "dataset/verification"
