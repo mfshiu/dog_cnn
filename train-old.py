@@ -123,7 +123,7 @@ class SiamDataset(Dataset):
 
         # I create a positive pair with label of similarity 1
 
-        clas = np.random.randint(0, 19)
+        clas = np.random.randint(0, 18)
 
         length = len(self.img[clas])
         im1, im2 = np.random.randint(0, length, 2)
@@ -146,9 +146,9 @@ class SiamDataset(Dataset):
         # I create a negative pair with label of similarity 0
 
         len1 = len(self.img[clas])
-        clas2 = np.random.randint(0, 19)
+        clas2 = np.random.randint(0, 18)
         while clas2 == clas:
-            clas2 = np.random.randint(0, 19)
+            clas2 = np.random.randint(0, 18)
 
         len2 = len(self.img[clas2])
 
