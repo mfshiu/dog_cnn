@@ -83,7 +83,7 @@ class SiamDataset(Dataset):
         teest_labels = []
         self.mode = mode
 
-        for id in range(1, 20):
+        for id in range(0, 20):
             files = glob.glob(os.path.join(path, str(id).zfill(4), "*.*"))
             print(id, " length", len(files))
             img.append(files)
