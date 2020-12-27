@@ -212,7 +212,7 @@ if __name__ == '__main__':
     test_dataloader = DataLoader(testset, shuffle=True, batch_size=1,
                                  num_workers=15)
 
-    number_epochs = 5
+    number_epochs = 500
     Criterion = ContrastiveLoss()
     Optimizer = to.optim.Adam(siam.parameters(), lr=0.01)
 
@@ -266,6 +266,7 @@ if __name__ == '__main__':
     """##### Saving the model and plotting the error"""
 
     plt.plot(counter, loss_history)
+    plt.savefig(os.path.join(output_path, "loss.png"))
 
     model_path = os.path.join(trained_dir, "Siamese.pkl")
     to.save(siam.state_dict(), model_path)
@@ -287,6 +288,7 @@ if __name__ == '__main__':
 
     threshold = 1.1
     fig = plt.figure(1, figsize=(30, 100))
+    plt.savefig("./output/trained.png")
 
     i = 1
 
@@ -320,5 +322,6 @@ if __name__ == '__main__':
 
         i += 8
 
+    plt.savefig("./output/trial.png")
     plt.show()
 
