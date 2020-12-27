@@ -23,10 +23,11 @@ import matplotlib.pyplot as plt
 import torch as to
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
+from model import Siamese
 
 """## Training the Siamese Netwrok"""
 
-path = "./dataset/train"
+path = "dataset/train"
 
 """This function is used for sorting the images of the MNIST datset"""
 
@@ -77,24 +78,26 @@ class SiamDataset(Dataset):
         teest_labels = []
         self.mode = mode
 
-        for id in range(1, 20):
+        for id in range(1, 117):
+            if id == 98 or id == 99:
+                continue
             temp = []
             test_temp = []
-            files = glob.glob(os.path.join(path, str(id + 100).zfill(4), "*.bmp"))
+            files = glob.glob(os.path.join(path, str(id).zfill(4), "*.*"))
             for filename in files:
                 filenames.append(filename)
                 temp.append(filename)
                 labels.append(id)
                 # print(id, filename)
             if mode == "train":
-                temp = temp[:18]
-                labels = labels[:18]
-                test_temp = temp[18:]
+                temp = temp[:100]
+                labels = labels[:100]
+                test_temp = temp[100:]
                 test_labels = labels[18:]
 
             else:
-                temp = temp[18:]
-                labels = labels[18:]
+                temp = temp[100:]
+                labels = labels[100:]
 
             print(id, " length", len(temp))
             img.append(temp)
@@ -134,7 +137,7 @@ class SiamDataset(Dataset):
 
         # I create a positive pair with label of similarity 1
 
-        clas = np.random.randint(0, 19)
+        clas = np.random.randint(0, 116)
 
         length = len(self.img[clas])
         im1, im2 = np.random.randint(0, length, 2)
@@ -157,9 +160,9 @@ class SiamDataset(Dataset):
         # I create a negative pair with label of similarity 0
 
         len1 = len(self.img[clas])
-        clas2 = np.random.randint(0, 19)
+        clas2 = np.random.randint(0, 116)
         while clas2 == clas:
-            clas2 = np.random.randint(0, 19)
+            clas2 = np.random.randint(0, 116)
 
         len2 = len(self.img[clas2])
 
@@ -186,90 +189,8 @@ class SiamDataset(Dataset):
 
         # here I gave a smaller length than the real dataset's length so that the train can be faster
         if self.mode == "testing":
-            return 10
+            return 20
         return 500
-
-
-"""##### The Model Definition of Siamese Network
-
-Here unlike as stated in the paper I have used a single network and trained the dataset. This can be done as both the layers are completely tied even in the train.
-"""
-
-
-class Siamese(nn.Module):
-
-    def __init__(self):
-        super(Siamese, self).__init__()
-
-        # A simple two layer convolution followed by three fully connected layers should do
-
-        self.cnn = nn.Sequential(
-            nn.Conv2d(3, 64, 3, 1, 1),  # [64, 128, 128]
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2, 0),  # [64, 64, 64]
-
-            nn.Conv2d(64, 128, 3, 1, 1),  # [128, 64, 64]
-            nn.BatchNorm2d(128),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2, 0),  # [128, 32, 32]
-
-            nn.Conv2d(128, 256, 3, 1, 1),  # [256, 32, 32]
-            nn.BatchNorm2d(256),
-            nn.ReLU(),
-
-        )
-
-        self.fc = nn.Sequential(
-            nn.Linear(256, 128),
-            nn.ReLU(),
-            nn.Linear(128, 32),
-            nn.ReLU(),
-            nn.Linear(32, 2),
-        )
-
-    def forward_once(self, x):
-        out = self.cnn(x)
-        # print(out.shape)
-        out = out.view(-1, 256)
-        # print(out.shape)
-        return self.fc(out)
-
-    def forward(self, x, y):
-
-        # doing the forwarding twice so as to obtain the same functions as that of twin networks
-
-        out1 = self.forward_once(x)
-        out2 = self.forward_once(y)
-
-        return out1, out2
-
-    def evaluate(self, x, y):
-
-        # this can be used later for evalutation
-
-        m = to.tensor(1.0, dtype=to.float32).cuda()
-
-        if type(m) != type(x):
-            x = to.tensor(x, dtype=to.float32, requires_grad=False).cuda()
-
-        if type(m) != type(y):
-            y = to.tensor(y, dtype=to.float32, requires_grad=False).cuda()
-
-        x = x.view(-1, 3, img_size, img_size)
-        y = y.view(-1, 3, img_size, img_size)
-
-        with to.no_grad():
-
-            out1, out2 = self.forward(x, y)
-
-            return nn.functional.pairwise_distance(out1, out2)
-
-
-"""##### Loss Function Definition for Siamese Network
-
-Here the contrastive loss as defined in the paper is used
-"""
 
 
 class ContrastiveLoss(nn.Module):
@@ -421,145 +342,4 @@ if __name__ == '__main__':
         i += 8
 
     plt.show()
-
-#
-# # !ls
-#
-# img_size = 256
-#
-# class TestDataset(Dataset):
-#
-#     def __init__(self, id):
-#
-#         # We import the MNIST dataset that is pre formatted and kept as a csv file
-#         # in which each row contains a single image flattened out to 784 pixels
-#         # so each row contains 784 entries
-#         # after the import we reshape the image in the format required by pytorch i.e. (C,H,W)
-#         filenames = []
-#         labels = []
-#         img = []
-#         test_img = []
-#         teest_labels = []
-#         if id > 10:
-#           id_str = "00"+str(id)
-#         else:
-#           id_str = "000"+str(id)
-#
-#
-#         test_id = np.random.randint(2,65)
-#         self.id = id
-#         self.test_id = test_id
-#         print(id, test_id)
-#         if test_id >= 10:
-#           test_id_str = "00"+str(test_id)
-#         else:
-#           test_id_str = "000"+str(test_id)
-#         #農委會狗鼻_手標/0030/1.PNG
-#         files = glob.glob(os.path.join("./農委會狗鼻_手標/"+id_str,"*.PNG"))
-#         #print("id",id, test_id_str)
-#         test_img = glob.glob(os.path.join("./農委會狗鼻_手標/"+test_id_str,"*.PNG"))
-#
-#         print(files, test_img)
-#         while test_id == id:
-#           test_id = np.random.randint(2,65)
-#           if test_id > 10:
-#             test_id_str = "00"+str(test_id)
-#           else:
-#             test_id_str = "000"+str(test_id)
-#           #農委會狗鼻_手標/0030/1.PNG
-#           files = glob.glob(os.path.join("./農委會狗鼻_手標/"+id_str,"*.PNG"))
-#           #print("id",id, test_id_str)
-#           test_img = glob.glob(os.path.join("./農委會狗鼻_手標/"+test_id_str,"*.PNG"))
-#         self.test_id = test_id
-#
-#
-#         self.filenames = filenames
-#         self.labels = labels
-#         self.img = files
-#         self.test_img = test_img
-#         print(files,"\n", test_img)
-#         self.transform = transforms.Compose([
-#             transforms.ToPILImage(),
-#             transforms.Compose([transforms.Scale((img_size,img_size))]),
-#             #transforms.CenterCrop(img_size),
-#             transforms.Resize(img_size),
-#
-#             transforms.ToTensor(), # 將圖片轉成 Tensor，並把數值 normalize 到 [0,1] (data normalization)
-#         ])
-#
-#
-#     def __getitem__(self, idx):
-#         im1=np.random.randint(0,len(self.img))
-#         im2 = np.random.randint(0,len(self.img))
-#         while im2 == im1:
-#           print("while")
-#           im2 = np.random.randint(0,len(self.img))
-#         img1 = self.transform(np.array(Image.open(self.img[im1]).convert("RGB")))
-#         img2 = self.transform(np.array(Image.open(self.img[im2]).convert("RGB")))
-#
-#         img1 = to.tensor(np.reshape(img1,(3,img_size,img_size)), dtype=to.float32)
-#         img2 = to.tensor(np.reshape(img2,(3,img_size,img_size)), dtype=to.float32)
-#         y1 = to.tensor(np.ones(1,dtype=np.float32),dtype=to.float32)
-#         print(self.test_img[0], self.test_img[1])
-#
-#         test_im1 = np.random.randint(0,len(self.test_img))
-#         img3 = self.transform(np.array(Image.open(self.img[im1]).convert("RGB")))
-#         img4 = self.transform(np.array(Image.open(self.test_img[1]).convert("RGB")))
-#
-#         img3 = to.tensor(np.reshape(img3,(3,img_size,img_size)), dtype=to.float32)
-#         img4 = to.tensor(np.reshape(img4,(3,img_size,img_size)), dtype=to.float32)
-#         y2 = to.tensor(np.zeros(1,dtype=np.float32),dtype=to.float32)
-#         c1 = self.img[0]
-#         c2 = self.test_img[1]
-#         return  img1, img2, y1, img3, img4, y2, self.id,self.test_id
-#
-#     def __len__(self):
-#
-#         # here I gave a smaller length than the real dataset's length so that the train can be faster
-#
-#         return 1
-#
-# threshold = 0.05
-# for i in range (1,9):
-#   print(i)
-#
-#   testset = TestDataset(id = i )
-#   print("finish load data")
-#   trial = []
-#
-#   for j in range(1):
-#       trial.append(testset[j])
-#   fig = plt.figure(1, figsize=(20,30))
-#
-#   i = 1
-#   import cv2
-#   for data in trial :
-#
-#       im1, im2, lb1, im3, im4, lb2, c1,c2= data
-#       print(c1, c2)
-#
-#       diss1 = siam.evaluate(im1.cuda(),im2.cuda()).cuda()
-#       diss2 = siam.evaluate(im3.cuda(),im4.cuda()).cuda()
-#
-#       im1 = np.concatenate((im1.numpy()[0],im2.numpy()[0]),axis=1)
-#       lb1 = lb1.numpy()
-#
-#       im2 = np.concatenate((im3.numpy()[0],im4.numpy()[0]),axis=1)
-#       lb2 = lb2.numpy()
-#
-#       diss1 = diss1.numpy().mean()
-#       diss2 = diss2.numpy().mean()
-#
-#       ax1 = fig.add_subplot(10,4,i) #rgb bgr
-#       ax1.title.set_text("label = "+str(lb1[0]) +" class"+ str(c1)+" \n "+"distance = "+str(diss1)+" \n "+"accept = "+str(diss1<threshold))
-#       ax1.imshow(im1,cmap="gist_stern" )
-#
-#       ax2 = fig.add_subplot(10,4,i+1)
-#       ax2.title.set_text("label = "+str(lb2[0])+ " class"+ str(c2) +" \n"+"distance = "+str(diss2)+" \n "+"accept = "+str(diss2<threshold))
-#       ax2.imshow(im2,cmap="gist_stern")
-#
-#       i+=8
-#
-#
-#   plt.show()
 
