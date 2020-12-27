@@ -302,8 +302,8 @@ if __name__ == '__main__':
         im2 = np.concatenate((im3.numpy()[0], im4.numpy()[0]), axis=1)
         lb2 = lb2.numpy()
 
-        diss1 = diss1.cuda().numpy().mean()
-        diss2 = diss2.cuda().numpy().mean()
+        diss1 = diss1.cpu().numpy().mean()
+        diss2 = diss2.cpu().numpy().mean()
 
         acceptance = False  ##接受與否
 
