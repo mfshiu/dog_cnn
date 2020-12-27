@@ -24,10 +24,17 @@ import torch as to
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 from model import Siamese
+import os
 
 """## Training the Siamese Netwrok"""
 
 path = "dataset/train"
+output_path = "./output"
+if not os.path.exists(output_path):
+    os.makedirs(output_path)
+trained_dir = './trained'
+if not os.path.exists(trained_dir):
+    os.makedirs(trained_dir)
 
 """This function is used for sorting the images of the MNIST datset"""
 
@@ -48,7 +55,6 @@ import torch.utils.data as Data
 import torchvision
 import matplotlib.pyplot as plt
 import glob
-import os
 from PIL import Image
 import warnings
 
@@ -206,7 +212,7 @@ if __name__ == '__main__':
     test_dataloader = DataLoader(testset, shuffle=True, batch_size=1,
                                  num_workers=15)
 
-    number_epochs = 500
+    number_epochs = 5
     Criterion = ContrastiveLoss()
     Optimizer = to.optim.Adam(siam.parameters(), lr=0.01)
 
@@ -261,17 +267,10 @@ if __name__ == '__main__':
 
     plt.plot(counter, loss_history)
 
-    from google.colab import drive
-    import os
-
-    drive.mount('/content/gdrive')
-    save_path = 'gdrive/My Drive/Dogs/CNN'
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-
-    to.save(siam.state_dict(), save_path + "/Siamese model.pth")
+    model_path = os.path.join(trained_dir, "Siamese.pkl")
+    to.save(siam.state_dict(), model_path)
     siam_test = Siamese().cuda()
-    siam_test.load_state_dict(torch.load(save_path + "/Siamese model.pth"))
+    siam_test.load_state_dict(to.load(model_path))
     siam_test.eval()
 
     """## Testing the model's prediction"""
