@@ -206,7 +206,9 @@ if __name__ == '__main__':
                                   num_workers=15)
 
     siam = Siamese().cuda()
-    siam.load_state_dict(to.load("./trained/Siamese-old.pkl"))
+    pretrained_model = "./trained/Siamese-old.pkl"
+    print("Load from %s" % (pretrained_model, ))
+    siam.load_state_dict(to.load(pretrained_model))
 
     testset = SiamDataset(mode="testing")
 
