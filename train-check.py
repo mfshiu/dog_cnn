@@ -44,13 +44,13 @@ class SiamDataset():
             dog1_1, dog1_2 = random.sample(dog1, 2)
             dog1_1_img = self.transform(np.array(Image.open(dog1_1).convert("RGB")))
             dog1_2_img = self.transform(np.array(Image.open(dog1_2).convert("RGB")))
-            dog1_1_tensor = to.as_tensor(np.reshape(dog1_1_img, (3, img_size, img_size)), dtype=to.float32)
-            dog1_2_tensor = to.as_tensor(np.reshape(dog1_2_img, (3, img_size, img_size)), dtype=to.float32)
+            dog1_1_tensor = to.tensor(np.reshape(dog1_1_img, (3, img_size, img_size)), dtype=to.float32)
+            dog1_2_tensor = to.tensor(np.reshape(dog1_2_img, (3, img_size, img_size)), dtype=to.float32)
             y1 = to.tensor(np.ones(1, dtype=np.float32), dtype=to.float32)
 
             dog2_1 = random.choice(dog2)
             dog2_1_img = self.transform(np.array(Image.open(dog2_1).convert("RGB")))
-            dog2_1_tensor = to.as_tensor(np.reshape(dog2_1_img, (3, img_size, img_size)), dtype=to.float32)
+            dog2_1_tensor = to.tensor(np.reshape(dog2_1_img, (3, img_size, img_size)), dtype=to.float32)
             y2 = to.tensor(np.zeros(1, dtype=np.float32), dtype=to.float32)
 
             return dog1_1_tensor, dog1_2_tensor, y1, dog1_1_tensor, dog2_1_tensor, y2
@@ -100,7 +100,7 @@ class SiamDataset():
         return SiamDataset.TestDataset(self.test_paths, len(self.test_paths)*4)
 
     def shuffle(self):
-        random.shuffle(self.img_pathss)
+        # random.shuffle(self.img_pathss)
         test_size = int(len(self.img_pathss) * self.test_ratio)
         self.train_paths = self.img_pathss[test_size:]
         self.test_paths = self.img_pathss[:test_size]
