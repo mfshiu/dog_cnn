@@ -58,9 +58,6 @@ def sigmoid(x):
     return 1/(1+math.exp(-x))
 
 
-siam_test = Siamese().cuda()
-siam_test.load_state_dict(torch.load(model_path, map_location=torch.device('cuda:0')))
-siam_test.eval()
 def evaludate_gpu(data):
     im1, im2 = data
     diss = siam_test.evaluate(im1.cuda(), im2.cuda())
@@ -110,6 +107,10 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         model_path = sys.argv[1]
     print("Model path: %s" % (model_path,))
+
+    siam_test = Siamese().cuda()
+    siam_test.load_state_dict(torch.load(model_path, map_location=torch.device('cuda:0')))
+    siam_test.eval()
 
     inference_output_path = "output/inferences-chinatrust.tsv"
     eer_output_path = "output/far_frr-chinatrust.tsv"
