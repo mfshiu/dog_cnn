@@ -33,7 +33,7 @@ max_epochs = 50
 
 class SiamDataset(Dataset):
 
-    def __init__(self, mode="train"):
+    def __init__(self, mode="train-20"):
 
         # We import the MNIST dataset that is pre formatted and kept as a csv file
         # in which each row contains a single image flattened out to 784 pixels
@@ -45,7 +45,7 @@ class SiamDataset(Dataset):
         test_img = []
         teest_labels = []
         self.mode = mode
-        path = "dataset/train"
+        path = "dataset/train-20"
 
         for id in range(1, 20):
             temp = []
@@ -56,7 +56,7 @@ class SiamDataset(Dataset):
                 temp.append(filename)
                 labels.append(id)
                 # print(id, filename)
-            if mode == "train":
+            if mode == "train-20":
                 temp = temp[:18]
                 labels = labels[:18]
                 test_temp = temp[18:]
@@ -74,7 +74,7 @@ class SiamDataset(Dataset):
         self.labels = labels
         self.img = img
         self.test_img = test_img
-        # train 時做 data augmentation
+        # train-20 時做 data augmentation
         self.transform = transforms.Compose([
 
             transforms.ToPILImage(),
@@ -154,7 +154,7 @@ class SiamDataset(Dataset):
 
     def __len__(self):
 
-        # here I gave a smaller length than the real dataset's length so that the train can be faster
+        # here I gave a smaller length than the real dataset's length so that the train-20 can be faster
         if self.mode == "testing":
             return 10
         return 500
@@ -174,7 +174,7 @@ if __name__ == '__main__':
         max_epochs = int(sys.argv[2])
     print("Use GPU: %s, Epochs: %d" % (use_gpu, max_epochs))
         
-    dataset_dir = "./dataset/train"
+    dataset_dir = "dataset/train-20"
 
     if use_gpu:
         siam = Siamese().cuda()
@@ -187,7 +187,7 @@ if __name__ == '__main__':
     siam.train()
     for epoch in range(max_epochs):
         loops = 0
-        train_dataloader = DataLoader(SiamDataset(mode="train"), shuffle=True, batch_size=20, num_workers=15)
+        train_dataloader = DataLoader(SiamDataset(mode="train-20"), shuffle=True, batch_size=20, num_workers=15)
         test_dataloader = DataLoader(SiamDataset(mode="test"), shuffle=True, batch_size=1, num_workers=15)
         for data in train_dataloader:
             loops += 1

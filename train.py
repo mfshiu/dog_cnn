@@ -120,7 +120,7 @@ if __name__ == '__main__':
         max_epochs = int(sys.argv[2])
     print("Use GPU: %s, Epochs: %d" % (use_gpu, max_epochs))
         
-    dataset_dir = "./dataset/train"
+    dataset_dir = "dataset/train-20"
 
     if use_gpu:
         siam = Siamese().cuda()
