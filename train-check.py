@@ -9,6 +9,7 @@ from PIL import Image
 import random
 import sys
 from model import Siamese
+import glob
 
 
 class ContrastiveLoss(nn.Module):
@@ -30,80 +31,133 @@ img_size = 128
 max_epochs = 50
 
 
-class SiamDataset():
-    class BaseDataset(Dataset):
-        def __init__(self, img_pathss, size=0):
-            self.img_pathss = img_pathss
-            self.size = size
-            if not self.size:
-                self.size = len(self.img_pathss) * 2
+class SiamDataset(Dataset):
 
-        def __getitem__(self, idx):
-            dog1, dog2 = random.sample(self.img_pathss, 2)
+    def __init__(self, mode="train"):
 
-            dog1_1, dog1_2 = random.sample(dog1, 2)
-            dog1_1_img = self.transform(np.array(Image.open(dog1_1).convert("RGB")))
-            dog1_2_img = self.transform(np.array(Image.open(dog1_2).convert("RGB")))
-            dog1_1_tensor = to.tensor(np.reshape(dog1_1_img, (3, img_size, img_size)), dtype=to.float32)
-            dog1_2_tensor = to.tensor(np.reshape(dog1_2_img, (3, img_size, img_size)), dtype=to.float32)
-            y1 = to.tensor(np.ones(1, dtype=np.float32), dtype=to.float32)
+        # We import the MNIST dataset that is pre formatted and kept as a csv file
+        # in which each row contains a single image flattened out to 784 pixels
+        # so each row contains 784 entries
+        # after the import we reshape the image in the format required by pytorch i.e. (C,H,W)
+        filenames = []
+        labels = []
+        img = []
+        test_img = []
+        teest_labels = []
+        self.mode = mode
+        path = "dataset/train"
 
-            dog2_1 = random.choice(dog2)
-            dog2_1_img = self.transform(np.array(Image.open(dog2_1).convert("RGB")))
-            dog2_1_tensor = to.tensor(np.reshape(dog2_1_img, (3, img_size, img_size)), dtype=to.float32)
-            y2 = to.tensor(np.zeros(1, dtype=np.float32), dtype=to.float32)
+        for id in range(1, 20):
+            temp = []
+            test_temp = []
+            files = glob.glob(os.path.join(path, str(id + 100).zfill(4), "*.bmp"))
+            for filename in files:
+                filenames.append(filename)
+                temp.append(filename)
+                labels.append(id)
+                # print(id, filename)
+            if mode == "train":
+                temp = temp[:18]
+                labels = labels[:18]
+                test_temp = temp[18:]
+                test_labels = labels[18:]
 
-            return dog1_1_tensor, dog1_2_tensor, y1, dog1_1_tensor, dog2_1_tensor, y2
+            else:
+                temp = temp[18:]
+                labels = labels[18:]
 
-        def __len__(self):
-            return self.size
+            print(id, " length", len(temp))
+            img.append(temp)
+            test_img.append(test_temp)
 
-    class TrainDataset(BaseDataset):
-        def __init__(self, img_pathss, size=0):
-            super().__init__(img_pathss, size)
+        self.filenames = filenames
+        self.labels = labels
+        self.img = img
+        self.test_img = test_img
+        # train 時做 data augmentation
+        self.transform = transforms.Compose([
 
-        def transform(self, imgs):
-            return transforms.Compose([
-                transforms.ToPILImage(),
-                transforms.CenterCrop(400),
-                transforms.Compose([transforms.Resize((img_size, img_size))]),
-                transforms.RandomRotation(50),
-                transforms.ToTensor(),
-            ])(imgs)
+            transforms.ToPILImage(),
 
-    class TestDataset(BaseDataset):
-        def __init__(self, img_pathss, size=0):
-            super().__init__(img_pathss, size)
+            transforms.CenterCrop(400),
+            # transforms.RandomHorizontalFlip(), # 隨機將圖片水平翻轉
+            transforms.Compose([transforms.Scale((img_size, img_size))]),
+            transforms.RandomRotation(50),  # 隨機旋轉圖片
+            # transforms.RandomResizedCrop(img_size, scale=(0.9, 1.0), ratio=(0.95, 1.3333333333333333), interpolation=2),
 
-        def transform(self, imgs):
-            return transforms.Compose([
-                transforms.ToPILImage(),
-                transforms.CenterCrop(400),
-                transforms.Compose([transforms.Resize((img_size, img_size))]),
-                transforms.ToTensor(),
-            ])(imgs)
+            transforms.ToTensor(),  # 將圖片轉成 Tensor，並把數值 normalize 到 [0,1] (data normalization)
+        ])
+        self.test_transform = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.CenterCrop(400),
+            transforms.Compose([transforms.Scale((img_size, img_size))]),
 
-    def __init__(self, dataset_dir, test_ratio=0.1):
-        self.test_ratio = test_ratio
-        paths = [x for x in os.walk(dataset_dir)]
-        self.img_pathss = []
-        self.train_paths = None
-        self.test_paths = None
-        for path in paths[1:]:
-            self.img_pathss.append([os.path.join(path[0], x) for x in path[2]])
-        self.shuffle()
+            transforms.ToTensor(),  # 將圖片轉成 Tensor，並把數值 normalize 到 [0,1] (data normalization)
+        ])
 
-    def get_train_dataset(self):
-        return SiamDataset.TrainDataset(self.train_paths, len(self.train_paths)*4)
+    def __getitem__(self, idx):
 
-    def get_test_dataset(self):
-        return SiamDataset.TestDataset(self.test_paths, len(self.test_paths)*4)
+        # this class is needed to be defined so that dataloader can be used
+        # here instead of giving the real index values I have returned randomly generated images
+        # so idx does not have any need but the function signature needs to be same so that the dataloader
+        # can call this function
 
-    def shuffle(self):
-        # random.shuffle(self.img_pathss)
-        test_size = int(len(self.img_pathss) * self.test_ratio)
-        self.train_paths = self.img_pathss[test_size:]
-        self.test_paths = self.img_pathss[:test_size]
+        # I create a positive pair with label of similarity 1
+
+        clas = np.random.randint(0, 19)
+
+        length = len(self.img[clas])
+        im1, im2 = np.random.randint(0, length, 2)
+        if self.mode == "testing":
+            while im1 == im2:
+                im2 = np.random.randint(0, length)
+        # print(im1, im2)
+
+        if self.mode == "testing":
+            img1 = self.test_transform(np.array(Image.open(self.img[clas][im1]).convert("RGB")))
+            img2 = self.test_transform(np.array(Image.open(self.img[clas][im2]).convert("RGB")))
+        else:
+            img1 = self.transform(np.array(Image.open(self.img[clas][im1]).convert("RGB")))
+            img2 = self.transform(np.array(Image.open(self.img[clas][im2]).convert("RGB")))
+
+        img1 = to.tensor(np.reshape(img1, (3, img_size, img_size)), dtype=to.float32)
+        img2 = to.tensor(np.reshape(img2, (3, img_size, img_size)), dtype=to.float32)
+        y1 = to.tensor(np.ones(1, dtype=np.float32), dtype=to.float32)
+
+        # I create a negative pair with label of similarity 0
+
+        len1 = len(self.img[clas])
+        clas2 = np.random.randint(0, 19)
+        while clas2 == clas:
+            clas2 = np.random.randint(0, 19)
+
+        len2 = len(self.img[clas2])
+
+        im3 = np.random.randint(0, len1)
+        im4 = np.random.randint(0, len2)
+
+        # img3 = self.transform(np.array(Image.open(self.img[clas][im1]).convert("RGB")))
+        # img4 = self.transform(np.array(Image.open(self.img[clas2][im4]).convert("RGB")))
+
+        if self.mode == "testing":
+            img3 = self.test_transform(np.array(Image.open(self.img[clas][im1]).convert("RGB")))
+            img4 = self.test_transform(np.array(Image.open(self.img[clas2][im4]).convert("RGB")))
+        else:
+            img3 = self.transform(np.array(Image.open(self.img[clas][im1]).convert("RGB")))
+            img4 = self.transform(np.array(Image.open(self.img[clas2][im4]).convert("RGB")))
+
+        img3 = to.tensor(np.reshape(img3, (3, img_size, img_size)), dtype=to.float32)
+        img4 = to.tensor(np.reshape(img4, (3, img_size, img_size)), dtype=to.float32)
+        y2 = to.tensor(np.zeros(1, dtype=np.float32), dtype=to.float32)
+        # print(y1, y2)
+        return img1, img2, y1, img3, img4, y2, clas, clas2
+
+    def __len__(self):
+
+        # here I gave a smaller length than the real dataset's length so that the train can be faster
+        if self.mode == "testing":
+            return 10
+        return 500
 
 
 output_path = "./output"
@@ -129,15 +183,12 @@ if __name__ == '__main__':
     Criterion = ContrastiveLoss()
     Optimizer = to.optim.Adam(siam.parameters(), lr=0.01)
 
-    siam_dataset = SiamDataset(dataset_dir)
-    print("Train dogs: %d, Test dogs: %d" % (len(siam_dataset.train_paths), len(siam_dataset.test_paths)))
     loss_history = []
     siam.train()
     for epoch in range(max_epochs):
         loops = 0
-        siam_dataset.shuffle()
-        train_dataloader = DataLoader(siam_dataset.get_train_dataset(), shuffle=True, batch_size=20, num_workers=15)
-        test_dataloader = DataLoader(siam_dataset.get_test_dataset(), shuffle=True, batch_size=1, num_workers=15)
+        train_dataloader = DataLoader(SiamDataset(mode="train"), shuffle=True, batch_size=20, num_workers=15)
+        test_dataloader = DataLoader(SiamDataset(mode="test"), shuffle=True, batch_size=1, num_workers=15)
         for data in train_dataloader:
             loops += 1
             print("\rEpoch %d/%d, training loops: %d" % (epoch+1, max_epochs, loops), end="")
