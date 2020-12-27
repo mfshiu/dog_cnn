@@ -74,40 +74,18 @@ class SiamDataset(Dataset):
         filenames = []
         labels = []
         img = []
-        test_img = []
         teest_labels = []
         self.mode = mode
 
-        for id in range(1, 119):
-            if id == 98 or id == 99:
-                continue
-            temp = []
-            test_temp = []
+        for id in range(1, 90):
             files = glob.glob(os.path.join(path, str(id).zfill(4), "*.*"))
-            for filename in files:
-                filenames.append(filename)
-                temp.append(filename)
-                labels.append(id)
-                # print(id, filename)
-            if mode == "train":
-                temp = temp[:100]
-                labels = labels[:100]
-                test_temp = temp[100:]
-                test_labels = labels[100:]
-
-            else:
-                temp = temp[100:]
-                labels = labels[100:]
-
-            print(id, " length", len(temp))
-            img.append(temp)
-            test_img.append(test_temp)
+            print(id, " length", len(files))
+            img.append(files)
 
         self.filenames = filenames
         self.labels = labels
         self.img = img
-        self.test_img = test_img
-        print("Total images: " + str(img))
+        print("Total images: %d" % (len(self.img),))
 
         # train 時做 data augmentation
         self.transform = transforms.Compose([
@@ -139,7 +117,7 @@ class SiamDataset(Dataset):
 
         # I create a positive pair with label of similarity 1
 
-        clas = np.random.randint(0, 115)
+        clas = np.random.randint(0, 89)
 
         length = len(self.img[clas])
         im1, im2 = np.random.randint(0, length, 2)
@@ -162,9 +140,9 @@ class SiamDataset(Dataset):
         # I create a negative pair with label of similarity 0
 
         len1 = len(self.img[clas])
-        clas2 = np.random.randint(0, 115)
+        clas2 = np.random.randint(0, 89)
         while clas2 == clas:
-            clas2 = np.random.randint(0, 115)
+            clas2 = np.random.randint(0, 89)
 
         len2 = len(self.img[clas2])
 
@@ -221,7 +199,7 @@ if __name__ == '__main__':
     train_dataloader = DataLoader(siamdset, shuffle=True, batch_size=20,
                                   num_workers=15)
 
-    siam = Siamese().cuda()
+    siam = Siamese().cpu()
 
     testset = SiamDataset(mode="testing")
 
@@ -249,11 +227,11 @@ if __name__ == '__main__':
 
             # here we obtain the positive pairs' loss as well as the negative pairs' loss
 
-            output1, output2 = siam(img1.cuda(), img2.cuda())
-            output3, output4 = siam(img3.cuda(), img4.cuda())
+            output1, output2 = siam(img1.cpu(), img2.cpu())
+            output3, output4 = siam(img3.cpu(), img4.cpu())
 
-            loss_pos = Criterion(output1, output2, label1.cuda())
-            loss_neg = Criterion(output3, output4, label2.cuda())
+            loss_pos = Criterion(output1, output2, label1.cpu())
+            loss_neg = Criterion(output3, output4, label2.cpu())
 
             # the total loss is then computed and back propagated
 
@@ -265,11 +243,11 @@ if __name__ == '__main__':
         siam.eval()
         for data in test_dataloader:
             img1, img2, label1, img3, img4, label2, c1, c2 = data
-            output1, output2 = siam(img1.cuda(), img2.cuda())
-            output3, output4 = siam(img3.cuda(), img4.cuda())
+            output1, output2 = siam(img1.cpu(), img2.cpu())
+            output3, output4 = siam(img3.cpu(), img4.cpu())
 
-            loss_pos = Criterion(output1, output2, label1.cuda())
-            loss_neg = Criterion(output3, output4, label2.cuda())
+            loss_pos = Criterion(output1, output2, label1.cpu())
+            loss_neg = Criterion(output3, output4, label2.cpu())
             val_loss_contrastive = loss_pos + loss_neg
 
         # printing the train errors
@@ -292,7 +270,7 @@ if __name__ == '__main__':
         os.makedirs(save_path)
 
     to.save(siam.state_dict(), save_path + "/Siamese model.pth")
-    siam_test = Siamese().cuda()
+    siam_test = Siamese().cpu()
     siam_test.load_state_dict(torch.load(save_path + "/Siamese model.pth"))
     siam_test.eval()
 
@@ -316,8 +294,8 @@ if __name__ == '__main__':
     for data in trial:
         im1, im2, lb1, im3, im4, lb2, C1, C2 = data
 
-        diss1 = siam_test.evaluate(im1.cuda(), im2.cuda())
-        diss2 = siam_test.evaluate(im3.cuda(), im4.cuda())
+        diss1 = siam_test.evaluate(im1.cpu(), im2.cpu())
+        diss2 = siam_test.evaluate(im3.cpu(), im4.cpu())
 
         im1 = np.concatenate((im1.numpy()[0], im2.numpy()[0]), axis=1)
         lb1 = lb1.numpy()
@@ -325,8 +303,8 @@ if __name__ == '__main__':
         im2 = np.concatenate((im3.numpy()[0], im4.numpy()[0]), axis=1)
         lb2 = lb2.numpy()
 
-        diss1 = diss1.cuda().numpy().mean()
-        diss2 = diss2.cuda().numpy().mean()
+        diss1 = diss1.cpu().numpy().mean()
+        diss2 = diss2.cpu().numpy().mean()
 
         acceptance = False  ##接受與否
 
