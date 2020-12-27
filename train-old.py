@@ -28,7 +28,7 @@ import os
 
 """## Training the Siamese Netwrok"""
 
-path = "dataset/train"
+path = "dataset/train-20"
 output_path = "./output"
 if not os.path.exists(output_path):
     os.makedirs(output_path)
@@ -83,7 +83,7 @@ class SiamDataset(Dataset):
         teest_labels = []
         self.mode = mode
 
-        for id in range(1, 90):
+        for id in range(1, 20):
             files = glob.glob(os.path.join(path, str(id).zfill(4), "*.*"))
             print(id, " length", len(files))
             img.append(files)
@@ -123,7 +123,7 @@ class SiamDataset(Dataset):
 
         # I create a positive pair with label of similarity 1
 
-        clas = np.random.randint(0, 89)
+        clas = np.random.randint(0, 19)
 
         length = len(self.img[clas])
         im1, im2 = np.random.randint(0, length, 2)
@@ -146,9 +146,9 @@ class SiamDataset(Dataset):
         # I create a negative pair with label of similarity 0
 
         len1 = len(self.img[clas])
-        clas2 = np.random.randint(0, 89)
+        clas2 = np.random.randint(0, 19)
         while clas2 == clas:
-            clas2 = np.random.randint(0, 89)
+            clas2 = np.random.randint(0, 19)
 
         len2 = len(self.img[clas2])
 
