@@ -57,7 +57,7 @@ EPOCH = 10  # 全部data訓練10次
 BATCH_SIZE = 50  # 每次訓練隨機丟50張圖像進去
 LR = 0.001  # learning rate
 DOWNLOAD_MNIST = True  # 第一次用要先下載data,所以是True
-if_use_gpu = 0  # 使用gpu
+if_use_gpu = 1  # 使用gpu
 
 img_size = 128
 
@@ -248,13 +248,13 @@ class Siamese(nn.Module):
 
         # this can be used later for evalutation
 
-        m = to.tensor(1.0, dtype=to.float32).cpu()
+        m = to.tensor(1.0, dtype=to.float32).cuda()
 
         if type(m) != type(x):
-            x = to.tensor(x, dtype=to.float32, requires_grad=False).cpu()
+            x = to.tensor(x, dtype=to.float32, requires_grad=False).cuda()
 
         if type(m) != type(y):
-            y = to.tensor(y, dtype=to.float32, requires_grad=False).cpu()
+            y = to.tensor(y, dtype=to.float32, requires_grad=False).cuda()
 
         x = x.view(-1, 3, img_size, img_size)
         y = y.view(-1, 3, img_size, img_size)
@@ -298,7 +298,7 @@ if __name__ == '__main__':
     train_dataloader = DataLoader(siamdset, shuffle=True, batch_size=20,
                                   num_workers=15)
 
-    siam = Siamese().cpu()
+    siam = Siamese().cuda()
 
     testset = SiamDataset(mode="testing")
 
@@ -326,11 +326,11 @@ if __name__ == '__main__':
 
             # here we obtain the positive pairs' loss as well as the negative pairs' loss
 
-            output1, output2 = siam(img1.cpu(), img2.cpu())
-            output3, output4 = siam(img3.cpu(), img4.cpu())
+            output1, output2 = siam(img1.cuda(), img2.cuda())
+            output3, output4 = siam(img3.cuda(), img4.cuda())
 
-            loss_pos = Criterion(output1, output2, label1.cpu())
-            loss_neg = Criterion(output3, output4, label2.cpu())
+            loss_pos = Criterion(output1, output2, label1.cuda())
+            loss_neg = Criterion(output3, output4, label2.cuda())
 
             # the total loss is then computed and back propagated
 
@@ -342,11 +342,11 @@ if __name__ == '__main__':
         siam.eval()
         for data in test_dataloader:
             img1, img2, label1, img3, img4, label2, c1, c2 = data
-            output1, output2 = siam(img1.cpu(), img2.cpu())
-            output3, output4 = siam(img3.cpu(), img4.cpu())
+            output1, output2 = siam(img1.cuda(), img2.cuda())
+            output3, output4 = siam(img3.cuda(), img4.cuda())
 
-            loss_pos = Criterion(output1, output2, label1.cpu())
-            loss_neg = Criterion(output3, output4, label2.cpu())
+            loss_pos = Criterion(output1, output2, label1.cuda())
+            loss_neg = Criterion(output3, output4, label2.cuda())
             val_loss_contrastive = loss_pos + loss_neg
 
         # printing the train errors
@@ -369,7 +369,7 @@ if __name__ == '__main__':
         os.makedirs(save_path)
 
     to.save(siam.state_dict(), save_path + "/Siamese model.pth")
-    siam_test = Siamese().cpu()
+    siam_test = Siamese().cuda()
     siam_test.load_state_dict(torch.load(save_path + "/Siamese model.pth"))
     siam_test.eval()
 
@@ -393,8 +393,8 @@ if __name__ == '__main__':
     for data in trial:
         im1, im2, lb1, im3, im4, lb2, C1, C2 = data
 
-        diss1 = siam_test.evaluate(im1.cpu(), im2.cpu())
-        diss2 = siam_test.evaluate(im3.cpu(), im4.cpu())
+        diss1 = siam_test.evaluate(im1.cuda(), im2.cuda())
+        diss2 = siam_test.evaluate(im3.cuda(), im4.cuda())
 
         im1 = np.concatenate((im1.numpy()[0], im2.numpy()[0]), axis=1)
         lb1 = lb1.numpy()
@@ -402,8 +402,8 @@ if __name__ == '__main__':
         im2 = np.concatenate((im3.numpy()[0], im4.numpy()[0]), axis=1)
         lb2 = lb2.numpy()
 
-        diss1 = diss1.cpu().numpy().mean()
-        diss2 = diss2.cpu().numpy().mean()
+        diss1 = diss1.cuda().numpy().mean()
+        diss2 = diss2.cuda().numpy().mean()
 
         acceptance = False  ##接受與否
 
@@ -538,8 +538,8 @@ if __name__ == '__main__':
 #       im1, im2, lb1, im3, im4, lb2, c1,c2= data
 #       print(c1, c2)
 #
-#       diss1 = siam.evaluate(im1.cpu(),im2.cpu()).cpu()
-#       diss2 = siam.evaluate(im3.cpu(),im4.cpu()).cpu()
+#       diss1 = siam.evaluate(im1.cuda(),im2.cuda()).cuda()
+#       diss2 = siam.evaluate(im3.cuda(),im4.cuda()).cuda()
 #
 #       im1 = np.concatenate((im1.numpy()[0],im2.numpy()[0]),axis=1)
 #       lb1 = lb1.numpy()
