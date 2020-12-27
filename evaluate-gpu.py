@@ -104,19 +104,28 @@ def calculate_far_frr(inferences, group_size, threshold):
 
 
 if __name__ == '__main__':
+    inference_output_path = "output/inferences.tsv"
+    eer_output_path = "output/eer.tsv"
+    dog_input_root = "dataset/verification"
+    dog_count = 85
+    group_size = 2
+
     if len(sys.argv) > 1:
         model_path = sys.argv[1]
+    if len(sys.argv) > 2:
+        dog_input_root = sys.argv[2]
+    if len(sys.argv) > 3:
+        dog_count = int(sys.argv[3])
+    if len(sys.argv) > 4:
+        group_size = int(sys.argv[4])
     print("Model path: %s" % (model_path,))
+    print("Input path: %s" % (dog_input_root,))
+    print("dog_count: %s" % (dog_count,))
+    print("group_size: %s" % (group_size,))
 
     siam_test = Siamese().cuda()
     siam_test.load_state_dict(torch.load(model_path, map_location=torch.device('cuda:0')))
     siam_test.eval()
-
-    inference_output_path = "output/inferences-chinatrust.tsv"
-    eer_output_path = "output/far_frr-chinatrust.tsv"
-    dog_input_root = "dataset/verification"
-    dog_count = 85
-    group_size = 2
 
     dog_paths = [x for x in os.walk(dog_input_root)]
     dog_paths.sort()
