@@ -107,6 +107,8 @@ class SiamDataset(Dataset):
         self.labels = labels
         self.img = img
         self.test_img = test_img
+        print("Total images: " + str(img))
+
         # train 時做 data augmentation
         self.transform = transforms.Compose([
 
