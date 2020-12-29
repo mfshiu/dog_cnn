@@ -13,8 +13,8 @@ Original file is located at
 
 #! gdown --id "1BrbfVxBBsCgDtlh-FW7N06fRdMwgWAkA" --output data.zip
 #!unzip data.zip
-! gdown --id "1vrJFkpEZu5CHp9i-EGM3JYYmqQORxdJT" --output data.zip
-!unzip data.zip
+#! gdown --id "1vrJFkpEZu5CHp9i-EGM3JYYmqQORxdJT" --output data.zip
+#!unzip data.zip
 
 import numpy as np
 import pandas as pd
@@ -344,9 +344,9 @@ for epoch in range(start,start+number_epochs):
 
 plt.plot(counter,loss_history)
 
-to.save(siam.state_dict(), "./Siamese model")
+to.save(siam.state_dict(), "./trained/Siamese.pkl")
 siam_test = Siamese().cuda()
-siam_test.load_state_dict(torch.load("./Siamese model"))
+siam_test.load_state_dict(torch.load("./trained/Siamese.pkl"))
 siam_test.eval()
 
 """## Testing the model's prediction"""
@@ -399,7 +399,7 @@ for data in trial :
 
 plt.show()
 
-!ls
+#!ls
 
 img_size = 400
 
