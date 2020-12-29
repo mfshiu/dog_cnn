@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 import torch as to
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
+from model import Siamese
 
 """## Training the Siamese Netwrok"""
 
@@ -200,7 +201,7 @@ class SiamDataset(Dataset):
 Here unlike as stated in the paper I have used a single network and trained the dataset. This can be done as both the layers are completely tied even in the training.
 """
 
-class Siamese(nn.Module):
+class xSiamese(nn.Module):
     
     def __init__(self):
         super(Siamese,self).__init__()
