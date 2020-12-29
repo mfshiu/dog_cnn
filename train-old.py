@@ -181,7 +181,7 @@ class SiamDataset(Dataset):
 
         # here I gave a smaller length than the real dataset's length so that the train can be faster
         if self.mode == "testing":
-            return 20
+            return 10
         return 500
 
 
@@ -207,17 +207,15 @@ Defining necessary parameters
 if __name__ == '__main__':
 
     siamdset = SiamDataset()
-
     train_dataloader = DataLoader(siamdset, shuffle=True, batch_size=20,
                                   num_workers=15)
 
     siam = Siamese().cuda()
-    pretrained_model = "./trained/Siamese-old.pkl"
-    print("Load from %s" % (pretrained_model, ))
-    siam.load_state_dict(to.load(pretrained_model))
+    # pretrained_model = "./trained/Siamese-old.pkl"
+    # print("Load from %s" % (pretrained_model, ))
+    # siam.load_state_dict(to.load(pretrained_model))
 
     testset = SiamDataset(mode="testing")
-
     test_dataloader = DataLoader(testset, shuffle=True, batch_size=1,
                                  num_workers=15)
 
