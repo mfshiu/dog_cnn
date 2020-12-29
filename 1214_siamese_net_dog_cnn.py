@@ -363,6 +363,7 @@ for epoch in range(start,start+number_epochs):
 """##### Saving the model and plotting the error"""
 
 plt.plot(counter,loss_history)
+plt.savefig("output/loss.png")
 
 import os
 
