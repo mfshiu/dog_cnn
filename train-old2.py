@@ -237,7 +237,7 @@ if __name__ == '__main__':
     test_dataloader = DataLoader(testset, shuffle=True, batch_size= 1,
                             num_workers=15)
 
-    max_epochs = 50
+    max_epochs = 200
     Criterion = ContrastiveLoss()
     Optimizer = to.optim.Adam(siam.parameters(),lr = 0.01 )
 

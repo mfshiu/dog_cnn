@@ -11,10 +11,10 @@ Original file is located at
 ### Importing the necessary Libraries
 """
 
-#! gdown --id "1BrbfVxBBsCgDtlh-FW7N06fRdMwgWAkA" --output data.zip
-#!unzip data.zip
-! gdown --id "1vrJFkpEZu5CHp9i-EGM3JYYmqQORxdJT" --output data.zip
-!unzip data.zip
+# ! gdown --id "1BrbfVxBBsCgDtlh-FW7N06fRdMwgWAkA" --output data.zip
+# !unzip data.zip
+# ! gdown --id "1vrJFkpEZu5CHp9i-EGM3JYYmqQORxdJT" --output data.zip
+# !unzip data.zip
 
 import numpy as np
 import pandas as pd
@@ -23,12 +23,20 @@ import matplotlib.pyplot as plt
 import torch as to
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
+import os
 
 """## Training the Siamese Netwrok"""
 
 path = "./狗鼻紋影像資料庫_segmented"
 
-"""This function is used for sorting the img of the MNIST datset"""
+output_path = "./output"
+if not os.path.exists(output_path):
+    os.makedirs(output_path)
+trained_dir = './trained'
+if not os.path.exists(trained_dir):
+    os.makedirs(trained_dir)
+
+"""This function is used for sorting the images of the MNIST datset"""
 
 def secondval( value ):
     
@@ -46,7 +54,6 @@ import torch.utils.data as Data
 import torchvision
 import matplotlib.pyplot as plt
 import glob
-import os
 from PIL import Image
 import warnings
 warnings.simplefilter("ignore", UserWarning)
@@ -57,7 +64,7 @@ LR =0.001                 #learning rate
 DOWNLOAD_MNIST = True    #第一次用要先下載data,所以是True
 if_use_gpu = 1            #使用gpu
 
-img_size = 400
+img_size = 128
 class SiamDataset(Dataset):
     
     def __init__(self, mode = "train-20"):
@@ -110,18 +117,20 @@ class SiamDataset(Dataset):
         self.transform = transforms.Compose([
             
             transforms.ToPILImage(),
+            
+            transforms.CenterCrop(400),
+            #transforms.RandomHorizontalFlip(), # 隨機將圖片水平翻轉
             transforms.Compose([transforms.Scale((img_size,img_size))]),
-            transforms.CenterCrop(img_size),
-            transforms.RandomHorizontalFlip(), # 隨機將圖片水平翻轉
-            transforms.RandomRotation(30), # 隨機旋轉圖片
-            transforms.RandomResizedCrop(img_size, scale=(0.9, 1.0), ratio=(0.95, 1.3333333333333333), interpolation=2),
+            transforms.RandomRotation(50), # 隨機旋轉圖片
+            #transforms.RandomResizedCrop(img_size, scale=(0.9, 1.0), ratio=(0.95, 1.3333333333333333), interpolation=2),
 
             transforms.ToTensor(), # 將圖片轉成 Tensor，並把數值 normalize 到 [0,1] (data normalization)
         ])
         self.test_transform = transforms.Compose([
             transforms.ToPILImage(),
+            transforms.CenterCrop(400),
             transforms.Compose([transforms.Scale((img_size,img_size))]),
-            transforms.CenterCrop(img_size),
+            
             transforms.ToTensor(), # 將圖片轉成 Tensor，並把數值 normalize 到 [0,1] (data normalization)
         ])
     
@@ -129,19 +138,20 @@ class SiamDataset(Dataset):
     def __getitem__(self, idx):
         
         # this class is needed to be defined so that dataloader can be used
-        # here instead of giving the real index values I have returned randomly generated img
+        # here instead of giving the real index values I have returned randomly generated images
         # so idx does not have any need but the function signature needs to be same so that the dataloader
         # can call this function
         
         # I create a positive pair with label of similarity 1
         
-        clas = np.random.randint(1,19)
+        clas = np.random.randint(0,19)
             
         length = len(self.img[clas])
         im1, im2 = np.random.randint(0,length,2)
         if self.mode =="testing":
           while im1 == im2:
              im2 = np.random.randint(0,length)
+        #print(im1, im2)
 
         
         
@@ -160,9 +170,9 @@ class SiamDataset(Dataset):
         # I create a negative pair with label of similarity 0
         
         len1 = len(self.img[clas])
-        clas2 = np.random.randint(1,19)
+        clas2 = np.random.randint(0,19)
         while clas2 == clas:
-          clas2 = np.random.randint(1,19)
+          clas2 = np.random.randint(0,19)
         
         len2 = len(self.img[clas2])
         
@@ -188,8 +198,9 @@ class SiamDataset(Dataset):
     def __len__(self):
         
         # here I gave a smaller length than the real dataset's length so that the train-20 can be faster
-            
-        return 200
+        if self.mode =="testing":
+          return 10    
+        return 500
 
 """##### The Model Definition of Siamese Network
 
@@ -217,6 +228,7 @@ class Siamese(nn.Module):
             nn.Conv2d(128, 256, 3, 1, 1), # [256, 32, 32]
             nn.BatchNorm2d(256),
             nn.ReLU(),
+            
         )
         
         self.fc = nn.Sequential(
@@ -224,7 +236,7 @@ class Siamese(nn.Module):
             nn.ReLU(),
             nn.Linear(128, 32),
             nn.ReLU(),
-            nn.Linear(32, 2)
+            nn.Linear(32, 2),
         )
         
         
@@ -291,117 +303,133 @@ class ContrastiveLoss(nn.Module):
 
 Defining necessary parameters
 """
+if __name__ == '__main__':
+    siamdset = SiamDataset()
 
-siamdset = SiamDataset()
+    train_dataloader = DataLoader(siamdset, shuffle=True, batch_size=20,
+                            num_workers=15)
 
-train_dataloader = DataLoader(siamdset, shuffle=True, batch_size= 12,
-                        num_workers=15)
+    siam = Siamese().cuda()
 
-siam = Siamese().cuda()
+    testset = SiamDataset(mode = "testing")
 
-number_epochs = 500
-Criterion = ContrastiveLoss()
-Optimizer = to.optim.Adam(siam.parameters(),lr = 0.0001 )
+    test_dataloader = DataLoader(testset, shuffle=True, batch_size= 1,
+                            num_workers=15)
 
-counter = []
-loss_history = [] 
-iteration_number= 0
-start = 0
+    max_epochs = 50
+    Criterion = ContrastiveLoss()
+    Optimizer = to.optim.Adam(siam.parameters(),lr = 0.01 )
 
-start = 0
-siam.train()
-for epoch in range(start,start+number_epochs):
-    for data in train_dataloader:
-        #print(data)
-   
-        img1, img2 , label1, img3, img4, label2,c1,c2 = data
-    
-        Optimizer.zero_grad()
-        
-        # here we obtain the positive pairs' loss as well as the negative pairs' loss
-        
-        output1,output2 = siam(img1.cuda(),img2.cuda())
-        output3,output4 = siam(img3.cuda(),img4.cuda())
-        
-        loss_pos = Criterion(output1,output2,label1.cuda())
-        loss_neg = Criterion(output3,output4,label2.cuda())
-        
-        # the total loss is then computed and back propagated
-        
-        loss_contrastive = loss_pos + loss_neg
-        
-        loss_contrastive.backward()
-        
-        Optimizer.step()
-    
-    # printing the train-20 errors
-    
-    print("Epoch number {}\n  Current loss {}\n".format(epoch,loss_contrastive.item()))
-    counter.append(epoch+100)
-    loss_history.append(loss_contrastive.item())
+    counter = []
+    loss_history = []
+    iteration_number= 0
+    start = 0
 
-"""##### Saving the model and plotting the error"""
+    start = 0
+    siam.train()
+    for epoch in range(start, start + max_epochs):
+        for data in train_dataloader:
+            #print(data)
+            siam.train()
+            img1, img2 , label1, img3, img4, label2,c1,c2 = data
 
-plt.plot(counter,loss_history)
+            Optimizer.zero_grad()
 
-to.save(siam.state_dict(), "./Siamese model")
-siam_test = Siamese().cuda()
-siam_test.load_state_dict(torch.load("./Siamese model"))
-siam_test.eval()
+            # here we obtain the positive pairs' loss as well as the negative pairs' loss
 
-"""## Testing the model's prediction"""
+            output1,output2 = siam(img1.cuda(),img2.cuda())
+            output3,output4 = siam(img3.cuda(),img4.cuda())
 
-# Commented out IPython magic to ensure Python compatibility.
-# %matplotlib inline
+            loss_pos = Criterion(output1,output2,label1.cuda())
+            loss_neg = Criterion(output3,output4,label2.cuda())
 
-trial = list()
-siamdset = SiamDataset(mode= "testing")
-siam.eval()
-for i in range(0,20):
-    trial.append(siamdset[i])
+            # the total loss is then computed and back propagated
 
-threshold = 1
-fig = plt.figure(1, figsize=(30,100))
+            loss_contrastive = loss_pos + loss_neg
 
-i = 1 
+            loss_contrastive.backward()
 
-for data in trial :
-    
+            Optimizer.step()
+        siam.eval()
+        for data in test_dataloader:
+            img1, img2 , label1, img3, img4, label2,c1,c2 = data
+            output1,output2 = siam(img1.cuda(),img2.cuda())
+            output3,output4 = siam(img3.cuda(),img4.cuda())
 
-    im1, im2, lb1, im3, im4, lb2,C1,C2 = data
+            loss_pos = Criterion(output1,output2,label1.cuda())
+            loss_neg = Criterion(output3,output4,label2.cuda())
+            val_loss_contrastive = loss_pos + loss_neg
 
-    diss1 = siam_test.evaluate(im1.cuda(),im2.cuda())
-    diss2 = siam_test.evaluate(im3.cuda(),im4.cuda())
-    
-    im1 = np.concatenate((im1.numpy()[0],im2.numpy()[0]),axis=1)
-    lb1 = lb1.numpy()
-    
-    im2 = np.concatenate((im3.numpy()[0],im4.numpy()[0]),axis=1)
-    lb2 = lb2.numpy()
-    
-    diss1 = diss1.cpu().numpy().mean()
-    diss2 = diss2.cpu().numpy().mean()
+        # printing the train-20 errors
 
-    acceptance = False ##接受與否
+        print("Epoch number {}/{}\n  Current loss {} Val loss {}\n".format(epoch, max_epochs, loss_contrastive.item(), val_loss_contrastive.item()))
+        counter.append(epoch+100)
+        loss_history.append(loss_contrastive.item())
 
-    ax1 = fig.add_subplot(40,4,i)
-    
-    
-    ax1.title.set_text("label = "+str(lb1[0])+"\n"+"distance = "+str(diss1)+ " \n result = "+ str(diss1 < threshold))
-    ax1.imshow(im1,cmap="gist_stern")
-    
-    ax2 = fig.add_subplot(40,4,i+1)
-    ax2.title.set_text("label = "+str(lb2[0])+"\n"+"distance = "+str(diss2)+ " \n result = "+ str(diss2 < threshold))
-    ax2.imshow(im2,cmap="gist_stern")
+    """##### Saving the model and plotting the error"""
 
-    i+=8
+    import os
+    model_path = os.path.join(trained_dir, "Siamese.pkl")
+    to.save(siam.state_dict(), model_path)
+    siam_test = Siamese().cuda()
+    siam_test.load_state_dict(torch.load(model_path))
+    siam_test.eval()
+
+    """## Testing the model's prediction"""
+
+    # Commented out IPython magic to ensure Python compatibility.
+    # %matplotlib inline
+
+    trial = list()
+    siamdset = SiamDataset(mode= "testing")
+    siam.eval()
+    siam_test = siam
+    for i in range(0,20):
+        trial.append(siamdset[i])
+
+    threshold = 1.1
+    fig = plt.figure(1, figsize=(30,100))
+    plt.savefig("./output/trained.png")
+
+    i = 1
+
+    for data in trial :
 
 
-plt.show()
+        im1, im2, lb1, im3, im4, lb2,C1,C2 = data
 
-!ls
+        diss1 = siam_test.evaluate(im1.cuda(),im2.cuda())
+        diss2 = siam_test.evaluate(im3.cuda(),im4.cuda())
 
-img_size = 400
+        im1 = np.concatenate((im1.numpy()[0],im2.numpy()[0]),axis=1)
+        lb1 = lb1.numpy()
+
+        im2 = np.concatenate((im3.numpy()[0],im4.numpy()[0]),axis=1)
+        lb2 = lb2.numpy()
+
+        diss1 = diss1.cpu().numpy().mean()
+        diss2 = diss2.cpu().numpy().mean()
+
+        acceptance = False ##接受與否
+
+        ax1 = fig.add_subplot(40,4,i)
+
+
+        ax1.title.set_text("label = "+str(lb1[0])+"\n"+"distance = "+str(diss1)+ " \n result = "+ str(diss1 < threshold))
+        ax1.imshow(im1,cmap="gist_stern")
+
+        ax2 = fig.add_subplot(40,4,i+1)
+        ax2.title.set_text("label = "+str(lb2[0])+"\n"+"distance = "+str(diss2)+ " \n result = "+ str(diss2 < threshold))
+        ax2.imshow(im2,cmap="gist_stern")
+
+        i+=8
+
+
+    plt.savefig(os.path.join(output_path, "siam_test.png"))
+    plt.show()
+
+# !ls
+img_size = 256
 
 class TestDataset(Dataset):
     
@@ -430,10 +458,10 @@ class TestDataset(Dataset):
           test_id_str = "00"+str(test_id)
         else:
           test_id_str = "000"+str(test_id)
-        #狗鼻紋影像資料庫_segmented/0030/1.PNG
-        files = glob.glob(os.path.join("./狗鼻紋影像資料庫_segmented/"+id_str,"*.PNG"))
+        #農委會狗鼻_手標/0030/1.PNG  
+        files = glob.glob(os.path.join("./農委會狗鼻_手標/"+id_str,"*.PNG"))
         #print("id",id, test_id_str)
-        test_img = glob.glob(os.path.join("./狗鼻紋影像資料庫_segmented/"+test_id_str,"*.PNG"))
+        test_img = glob.glob(os.path.join("./農委會狗鼻_手標/"+test_id_str,"*.PNG"))
 
         print(files, test_img)
         while test_id == id:
@@ -442,10 +470,10 @@ class TestDataset(Dataset):
             test_id_str = "00"+str(test_id)
           else:
             test_id_str = "000"+str(test_id)
-          #狗鼻紋影像資料庫_segmented/0030/1.PNG
-          files = glob.glob(os.path.join("./狗鼻紋影像資料庫_segmented/"+id_str,"*.PNG"))
+          #農委會狗鼻_手標/0030/1.PNG  
+          files = glob.glob(os.path.join("./農委會狗鼻_手標/"+id_str,"*.PNG"))
           #print("id",id, test_id_str)
-          test_img = glob.glob(os.path.join("./狗鼻紋影像資料庫_segmented/"+test_id_str,"*.PNG"))
+          test_img = glob.glob(os.path.join("./農委會狗鼻_手標/"+test_id_str,"*.PNG"))
         self.test_id = test_id
         
 
@@ -495,46 +523,48 @@ class TestDataset(Dataset):
             
         return 1
 
-for i in range (1,9):
-  print(i)
+if __name__ == '__main__':
+    threshold = 0.05
+    for i in range (1,9):
+      print(i)
 
-  testset = TestDataset(id = i )
-  print("finish load data")
-  trial = []
-  
-  for j in range(1):
-      trial.append(testset[j])
-  fig = plt.figure(1, figsize=(20,30))
+      testset = TestDataset(id = i )
+      print("finish load data")
+      trial = []
 
-  i = 1 
-  import cv2
-  for data in trial :
+      for j in range(1):
+          trial.append(testset[j])
+      fig = plt.figure(1, figsize=(20,30))
 
-      im1, im2, lb1, im3, im4, lb2, c1,c2= data
-      print(c1, c2)
-      
-      diss1 = siam.evaluate(im1.cuda(),im2.cuda()).cpu()
-      diss2 = siam.evaluate(im3.cuda(),im4.cuda()).cpu()
-      
-      im1 = np.concatenate((im1.numpy()[0],im2.numpy()[0]),axis=1)
-      lb1 = lb1.numpy()
-      
-      im2 = np.concatenate((im3.numpy()[0],im4.numpy()[0]),axis=1)
-      lb2 = lb2.numpy()
-      
-      diss1 = diss1.numpy().mean()
-      diss2 = diss2.numpy().mean()
+      i = 1
+      import cv2
+      for data in trial :
 
-      ax1 = fig.add_subplot(10,4,i) #rgb bgr
-      ax1.title.set_text("label = "+str(lb1[0]) +" class"+ str(c1)+" \n "+"distance = "+str(diss1))
-      ax1.imshow(im1,cmap="gray" )
-      
-      ax2 = fig.add_subplot(10,4,i+1)
-      ax2.title.set_text("label = "+str(lb2[0])+ " class"+ str(c2) +" \n"+"distance = "+str(diss2))
-      ax2.imshow(im2,cmap="gray")
+          im1, im2, lb1, im3, im4, lb2, c1,c2= data
+          print(c1, c2)
 
-      i+=8
+          diss1 = siam.evaluate(im1.cuda(),im2.cuda()).cpu()
+          diss2 = siam.evaluate(im3.cuda(),im4.cuda()).cpu()
+
+          im1 = np.concatenate((im1.numpy()[0],im2.numpy()[0]),axis=1)
+          lb1 = lb1.numpy()
+
+          im2 = np.concatenate((im3.numpy()[0],im4.numpy()[0]),axis=1)
+          lb2 = lb2.numpy()
+
+          diss1 = diss1.numpy().mean()
+          diss2 = diss2.numpy().mean()
+
+          ax1 = fig.add_subplot(10,4,i) #rgb bgr
+          ax1.title.set_text("label = "+str(lb1[0]) +" class"+ str(c1)+" \n "+"distance = "+str(diss1)+" \n "+"accept = "+str(diss1<threshold))
+          ax1.imshow(im1,cmap="gist_stern" )
+
+          ax2 = fig.add_subplot(10,4,i+1)
+          ax2.title.set_text("label = "+str(lb2[0])+ " class"+ str(c2) +" \n"+"distance = "+str(diss2)+" \n "+"accept = "+str(diss2<threshold))
+          ax2.imshow(im2,cmap="gist_stern")
+
+          i+=8
 
 
-  plt.show()
-
+      plt.savefig(os.path.join(output_path, "testset.png"))
+      plt.show()
