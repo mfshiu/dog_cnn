@@ -1,7 +1,7 @@
 import os
 
 if __name__ == '__main__':
-    root = "dataset/dog_nose_unet"
+    root = "dataset/mixed"
     paths = [x for x in os.walk(root)]
     for file in paths[0][2]:
         dire = os.path.join(root, file[:3])
