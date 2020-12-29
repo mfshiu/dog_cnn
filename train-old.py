@@ -25,6 +25,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 from model import Siamese
 import os
+import random
 
 """## Training the Siamese Netwrok"""
 
@@ -130,9 +131,9 @@ class SiamDataset(Dataset):
         # I create a positive pair with label of similarity 1
 
         if self.mode == "testing":
-            clas, clas2 = np.random.sample(range(0, 2), 2)
+            clas, clas2 = random.sample(range(0, 2), 2)
         else:
-            clas, clas2 = np.random.sample(range(3, len(self.img) - 1), 2)
+            clas, clas2 = random.sample(range(3, len(self.img) - 1), 2)
 
 
         length = len(self.img[clas])
