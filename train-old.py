@@ -28,7 +28,7 @@ import os
 
 """## Training the Siamese Netwrok"""
 
-data_path = "dataset/mixed"
+data_path = "dataset/train-20"
 output_path = "./output"
 if not os.path.exists(output_path):
     os.makedirs(output_path)
@@ -83,11 +83,11 @@ class SiamDataset(Dataset):
         teest_labels = []
         self.mode = mode
 
-        for id in range(1, 87):
-            files = glob.glob(os.path.join(data_path, str(id).zfill(3), "*.*"))
-            print(id, " length", len(files))
-            if len(files):
-                img.append(files)
+        # for id in range(1, 87):
+        #     files = glob.glob(os.path.join(data_path, str(id).zfill(3), "*.*"))
+        #     print(id, " length", len(files))
+        #     if len(files):
+        #         img.append(files)
         for id in range(100, 120):
             files = glob.glob(os.path.join(data_path, str(id).zfill(4), "*.*"))
             print(id, " length", len(files))
