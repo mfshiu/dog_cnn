@@ -28,7 +28,7 @@ import os
 
 """## Training the Siamese Netwrok"""
 
-data_path = "dataset/verification"
+data_path = "dataset/dog_nose_unet"
 output_path = "./output"
 if not os.path.exists(output_path):
     os.makedirs(output_path)
@@ -84,9 +84,10 @@ class SiamDataset(Dataset):
         self.mode = mode
 
         for id in range(1, 86):
-            files = glob.glob(os.path.join(data_path, str(id).zfill(5), "*.*"))
+            files = glob.glob(os.path.join(data_path, str(id).zfill(3), "*.*"))
             print(id, " length", len(files))
-            img.append(files)
+            if len(files):
+                img.append(files)
 
         self.filenames = filenames
         self.labels = labels
