@@ -130,10 +130,11 @@ class SiamDataset(Dataset):
 
         # I create a positive pair with label of similarity 1
 
-        if self.mode == "testing":
-            clas, clas2 = random.sample(range(0, 2), 2)
-        else:
-            clas, clas2 = random.sample(range(3, len(self.img) - 1), 2)
+        clas, clas2 = random.sample(range(0, len(self.img) - 1), 2)
+        # if self.mode == "testing":
+        #     clas, clas2 = random.sample(range(0, 2), 2)
+        # else:
+        #     clas, clas2 = random.sample(range(3, len(self.img) - 1), 2)
 
 
         length = len(self.img[clas])
