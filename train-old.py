@@ -97,7 +97,7 @@ class SiamDataset(Dataset):
         self.filenames = filenames
         self.labels = labels
         self.img = img
-        print("Total images: %d" % (len(self.img),))
+        print("Total dogs: %d" % (len(self.img),))
 
         # train 時做 data augmentation
         self.transform = transforms.Compose([
