@@ -25,7 +25,6 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 from model import Siamese
 import os
-import random
 
 """## Training the Siamese Netwrok"""
 
@@ -130,12 +129,10 @@ class SiamDataset(Dataset):
 
         # I create a positive pair with label of similarity 1
 
-        clas, clas2 = random.sample(range(0, len(self.img) - 1), 2)
-        # if self.mode == "testing":
-        #     clas, clas2 = random.sample(range(0, 2), 2)
-        # else:
-        #     clas, clas2 = random.sample(range(3, len(self.img) - 1), 2)
-
+        if self.mode == "testing":
+            clas = np.random.randint(0, len(self.img)-1)
+        else:
+            clas = np.random.randint(0, len(self.img) - 1)
 
         length = len(self.img[clas])
         im1, im2 = np.random.randint(0, length, 2)
@@ -157,8 +154,14 @@ class SiamDataset(Dataset):
 
         # I create a negative pair with label of similarity 0
 
+        len1 = len(self.img[clas])
+        clas2 = np.random.randint(0, len(self.img)-1)
+        while clas2 == clas:
+            clas2 = np.random.randint(0, len(self.img)-1)
+
         len2 = len(self.img[clas2])
 
+        im3 = np.random.randint(0, len1)
         im4 = np.random.randint(0, len2)
 
         # img3 = self.transform(np.array(Image.open(self.img[clas][im1]).convert("RGB")))
