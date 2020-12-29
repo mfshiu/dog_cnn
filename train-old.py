@@ -129,7 +129,11 @@ class SiamDataset(Dataset):
 
         # I create a positive pair with label of similarity 1
 
-        clas = np.random.randint(0, len(self.img)-1)
+        if self.mode == "testing":
+            clas = np.random.randint(3, len(self.img) - 1)
+        else:
+            clas = np.random.randint(0, 2)
+
 
         length = len(self.img[clas])
         im1, im2 = np.random.randint(0, length, 2)
@@ -152,9 +156,12 @@ class SiamDataset(Dataset):
         # I create a negative pair with label of similarity 0
 
         len1 = len(self.img[clas])
-        clas2 = np.random.randint(0, len(self.img)-1)
+        clas2 = clas
         while clas2 == clas:
-            clas2 = np.random.randint(0, len(self.img)-1)
+            if self.mode == "testing":
+                clas2 = np.random.randint(3, len(self.img) - 1)
+            else:
+                clas2 = np.random.randint(0, 2)
 
         len2 = len(self.img[clas2])
 
@@ -294,8 +301,8 @@ if __name__ == '__main__':
         trial.append(siamdset[i])
 
     threshold = 1.1
-    fig = plt.figure(1, figsize=(30, 100))
-    plt.savefig("./output/trained.png")
+    # fig = plt.figure(1, figsize=(30, 100))
+    # plt.savefig("./output/trained.png")
 
     i = 1
 
@@ -329,6 +336,6 @@ if __name__ == '__main__':
 
         i += 8
 
-    plt.savefig("./output/trial.png")
-    plt.show()
+    # plt.savefig("./output/trial.png")
+    # plt.show()
 
