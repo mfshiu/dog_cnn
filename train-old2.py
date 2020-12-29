@@ -83,7 +83,7 @@ class SiamDataset(Dataset):
         
         
 
-        for id in range(0,20):
+        for id in range(100, 120):
           temp = []
           test_temp = []
           files= glob.glob(os.path.join(path, str(id).zfill(4), "*.bmp"))
